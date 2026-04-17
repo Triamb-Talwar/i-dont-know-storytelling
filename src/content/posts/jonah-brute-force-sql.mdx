@@ -1,0 +1,41 @@
+---
+title: "why jonah brute-forces sql"
+slug: "jonah-brute-force-sql"
+category: tech
+visibility: public
+created: 2026-03-14
+tags: [jonah, agents, sql, openclaw]
+links:
+  - slug: "god-of-war-ragnarok"
+    reason: "where the name mimir came from"
+    strength: 0.6
+  - slug: "sunday-notes"
+    reason: "first scratch of this idea"
+    strength: 0.4
+---
+
+jonah doesn't know sql. jonah isn't supposed to know sql. jonah is an agent i wrote on a thursday afternoon when i was tired of hand-writing joins for a csv import script i only needed to run twice.
+
+the premise is dumb on purpose. you give jonah a natural-language question and a schema dump. jonah writes a query. jonah runs the query. if it errors, jonah reads the error and writes a new query. jonah keeps going until either the query runs or jonah's budget of 20 tries is up.
+
+that's it. there's no plan step. there's no tool-selection layer. there's no "let me think about this". jonah is brute-force with a language model taped to it. and in the domain it lives in — a single-user dashboard over a known schema — that's completely fine.
+
+### why this keeps working
+
+people want to give every agent a planner. every agent gets rag. every agent gets a finite-state-machine scaffold and four layers of tool-calling orchestration. and in most domains that's correct — the search space is too large, the failure modes are too expensive, you can't brute-force your way out.
+
+but the sql domain has a property that makes brute-force cheap: **every failure teaches you something specific and actionable**. `column "user_name" does not exist` is not a vague signal. it's a precise instruction. jonah just reads the error, substitutes, retries. the error text is the plan.
+
+i wrote about the same pattern in a sibling agent i'm building, which i named mimir, which is named after [the god of war character](./god-of-war-ragnarok) because i was re-playing ragnarok the week i started the project and the head-in-a-bag felt appropriate for a "knows everything but is attached to someone else" agent.
+
+### the openclaw trick
+
+the one non-trivial piece is how jonah captures db errors without giving itself arbitrary execution privileges. the naive version pipes the query straight to psql and eats whatever comes back. the safer version — which is what i actually shipped — wraps the query in a transaction, runs it, captures the error from a read-only connection, and rolls back. openclaw (internal name, it's just a 40-line wrapper around pg) does this with one function.
+
+openclaw also happens to be where this whole direction started. i built it because i was tired of my sql scripts half-committing when i typo'd a column name. once i had a safe-execute primitive, letting an agent loop on it was a two-hour job.
+
+### what jonah is not
+
+jonah is not a general sql agent. jonah will hallucinate table names that sound reasonable. jonah will write `SELECT *` when it shouldn't. jonah has no memory between sessions. if you asked jonah to do analytics on a warehouse with 800 tables, jonah would fail cheerfully and tell you everything ran great.
+
+but on a 12-table dashboard with a thousand-row schema dump, jonah is fine. and [i didn't need more than fine](./sunday-notes).
