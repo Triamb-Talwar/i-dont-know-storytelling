@@ -1,0 +1,27 @@
+/* Non-theme-specific design tokens.
+   Per-category overrides (colors, fonts) live in themes/<category>.css
+   and are scoped via [data-theme="<category>"]. */
+
+:root {
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-narrative: cubic-bezier(0.7, 0, 0.3, 1);
+
+  --dur-micro: 180ms;
+  --dur-short: 260ms;
+  --dur-narrative: 700ms;
+  --dur-gta: 900ms;
+
+  --line-height-body: 1.55;
+  --line-height-display: 1.15;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

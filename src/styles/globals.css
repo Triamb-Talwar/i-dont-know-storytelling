@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+
+/* Base resets and non-theme design tokens live in tokens.css.
+   Per-category themes live in styles/themes/<category>.css. */
+@import './tokens.css';
