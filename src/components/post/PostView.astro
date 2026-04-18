@@ -2,6 +2,8 @@
 import type { Category } from '@lib/categories';
 import PostHeader from './PostHeader.astro';
 import PostMinimap from './PostMinimap';
+import { getVariants, variantsToDataAttrs, type JournalVariants } from '@lib/variations';
+import CoffeeRing from './variants/CoffeeRing.astro';
 
 interface Props {
   title: string;
@@ -12,10 +14,22 @@ interface Props {
 }
 
 const { title, category, created, tags, slug } = Astro.props;
+
+const variants = getVariants(category, slug, created);
+const dataAttrs = variantsToDataAttrs(variants);
+
+// Per-category inline CSS custom properties. Journal variants expose coffee-ring
+// position + opacity so the pseudo-element can be themed without extra selectors.
+let inlineStyle = '';
+if (category === 'journal') {
+  const j = variants as JournalVariants;
+  inlineStyle = `--coffee-x:${j.coffeeRingX}%;--coffee-y:${j.coffeeRingY}%;--coffee-opacity:${j.coffeeRingOpacity};`;
+}
 ---
 
-<article class="post-main" id="main-content">
+<article class="post-main" id="main-content" {...dataAttrs} style={inlineStyle}>
   <div class="post-hero" aria-hidden="true"></div>
+  {category === 'journal' && <CoffeeRing />}
   <PostHeader title={title} category={category} created={created} tags={tags} />
   <div class="post-body">
     <slot />
