@@ -58,11 +58,12 @@ p {
   margin: 0;
 }
 
-/* AsciiCanvas — inline scroll-driven ascii block */
+/* AsciiCanvas — full-bleed scroll-driven ascii block */
 .ascii-wrap {
   display: block;
-  margin-block: clamp(2rem, 5vh, 3.5rem);
-  overflow-x: auto;
+  margin-block: clamp(3rem, 8vh, 6rem);
+  margin-inline: calc(-1 * clamp(1.25rem, 4vw, 3rem));
+  overflow: hidden;
   color: var(--ascii-fg, currentColor);
   font-variant-ligatures: none;
 }
@@ -78,14 +79,15 @@ p {
 .ascii-pre {
   display: inline-block;
   margin: 0;
-  padding: 0.75rem 1rem;
+  padding: clamp(1rem, 3vw, 2rem);
   font-family: ui-monospace, 'JetBrains Mono', 'IBM Plex Mono', Menlo, monospace;
-  font-size: var(--ascii-size, 0.75rem);
-  line-height: 1.05;
+  font-size: var(--ascii-size, clamp(0.55rem, 0.9vw, 0.85rem));
+  line-height: 1.1;
   white-space: pre;
   letter-spacing: 0;
-  min-height: 1em;
+  min-height: 8rem;
   text-align: left;
+  max-width: 100%;
 }
 
 /* View transitions — graph node expands into post hero */

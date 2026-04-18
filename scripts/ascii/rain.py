@@ -4,9 +4,9 @@ from __future__ import annotations
 import random
 from _lib import blank, plot, write_frames
 
-COLS = 70
-ROWS = 18
-FRAMES = 48
+COLS = 120
+ROWS = 32
+FRAMES = 56
 SEED = 13
 
 
@@ -21,8 +21,8 @@ def main() -> None:
                 "x": x,
                 "phase": random.random(),
                 "speed": 0.6 + random.random() * 1.4,
-                "length": random.randint(3, 8),
-                "active": random.random() < 0.55,
+                "length": random.randint(5, 14),
+                "active": random.random() < 0.6,
             }
         )
 
