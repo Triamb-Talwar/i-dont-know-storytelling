@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "astro check",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "lighthouse": "node scripts/run-lighthouse.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.0",

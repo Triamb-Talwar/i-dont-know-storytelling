@@ -395,7 +395,10 @@ export default function Graph() {
   };
 
   const navigateToNode = (node: SimNode, event?: MouseEvent | PointerEvent) => {
-    if (node.visibility === 'private') return; // private nodes are teasers only
+    if (node.visibility === 'private') {
+      showPrivateToast();
+      return;
+    }
 
     // record breadcrumb from any previously hovered node
     if (hoverRef.current != null) {
@@ -584,16 +587,46 @@ export default function Graph() {
   }, [simNodes, size.w, size.h]);
 
   return (
-    <div ref={containerRef} className="graph-root" aria-hidden="true">
-      <canvas ref={canvasRef} className="graph-canvas" />
-      {status === 'loading' && <div className="graph-loading">mapping the graph…</div>}
-      {status === 'error' && <div className="graph-loading">could not load graph.</div>}
+    <div ref={containerRef} className="graph-root">
+      <canvas
+        ref={canvasRef}
+        className="graph-canvas"
+        role="application"
+        aria-label="interactive graph of posts. use tab or arrow keys to move between nodes, enter to open one. an accessible list of all posts is below."
+      />
+      {status === 'loading' && <div className="graph-loading" role="status">mapping the graph…</div>}
+      {status === 'error' && <div className="graph-loading" role="alert">could not load graph.</div>}
     </div>
   );
 }
 
 function clamp(v: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, v));
+}
+
+function showPrivateToast() {
+  const existing = document.getElementById('idks-private-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'idks-private-toast';
+  t.textContent = '🔒 private — ask me';
+  t.style.cssText = `
+    position: fixed; left: 50%; top: 1.5rem; transform: translateX(-50%);
+    z-index: 10000; pointer-events: none;
+    padding: 0.55rem 1rem; border-radius: 2px;
+    background: rgba(20,22,28,0.92); color: #e5e7eb;
+    font: 500 0.82rem/1 ui-monospace, "JetBrains Mono", monospace;
+    letter-spacing: 0.04em; border: 1px solid #2a2e36;
+    opacity: 0;
+  `;
+  document.body.appendChild(t);
+  t.animate(
+    [{ opacity: 0, transform: 'translate(-50%, -8px)' },
+     { opacity: 1, transform: 'translate(-50%, 0)', offset: 0.15 },
+     { opacity: 1, transform: 'translate(-50%, 0)', offset: 0.75 },
+     { opacity: 0, transform: 'translate(-50%, -6px)' }],
+    { duration: 2200, easing: 'cubic-bezier(0.4,0,0.2,1)', fill: 'forwards' },
+  ).onfinish = () => t.remove();
 }
 
 function wrapLabel(s: string, maxChars: number): string[] {
