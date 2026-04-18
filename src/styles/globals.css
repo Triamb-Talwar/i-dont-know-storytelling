@@ -56,3 +56,30 @@ h4 {
 p {
   margin: 0;
 }
+
+/* View transitions — graph node expands into post hero */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(graph-node),
+::view-transition-new(graph-node) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(graph-node),
+  ::view-transition-new(graph-node),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0ms !important;
+  }
+}

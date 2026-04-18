@@ -1,92 +1,197 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
-import { CATEGORY_CONFIG } from '@lib/categories';
+import { CATEGORIES, CATEGORY_CONFIG } from '@lib/categories';
+import Graph from '@components/graph/Graph';
 
 const posts = await getCollection('posts', ({ data }) => data.visibility === 'public');
 posts.sort((a, b) => b.data.created.getTime() - a.data.created.getTime());
+
+const byCategory = CATEGORIES.map((c) => ({
+  id: c,
+  label: CATEGORY_CONFIG[c].label,
+  posts: posts.filter((p) => p.data.category === c),
+}));
 ---
 
 <BaseLayout title="i don't know storytelling">
   <main class="home">
-    <h1 class="home-title">i don't know storytelling</h1>
-    <p class="home-sub">but i have stories to tell.</p>
-    <p class="home-note">graph lands in phase 1.5. meanwhile, a list:</p>
-    <ul class="home-posts">
+    <header class="home-hdr" aria-hidden="true">
+      <h1 class="home-title">i don't know storytelling</h1>
+      <p class="home-sub">but i have stories to tell.</p>
+      <p class="home-hint">drag · scroll · click a node</p>
+    </header>
+
+    <div class="graph-wrap">
+      <Graph client:load />
+    </div>
+
+    {/* Parallel nav: crawlable + keyboard-reachable + mobile fallback */}
+    <nav class="parallel-nav" aria-label="all posts">
+      <h2>all posts</h2>
       {
-        posts.map((p) => {
-          const cfg = CATEGORY_CONFIG[p.data.category];
-          return (
-            <li>
-              <a href={`/posts/${p.data.slug}`}>
-                <span class="cat" style={`color:${cfg.primary}`}>{cfg.label}</span>
-                <span class="t">{p.data.title}</span>
-              </a>
-            </li>
-          );
-        })
+        byCategory.map((cat) =>
+          cat.posts.length === 0 ? null : (
+            <section>
+              <h3 style={`color:${CATEGORY_CONFIG[cat.id].primary}`}>{cat.label}</h3>
+              <ul>
+                {cat.posts.map((p) => (
+                  <li>
+                    <a href={`/posts/${p.data.slug}`}>{p.data.title}</a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ),
+        )
       }
-    </ul>
+    </nav>
   </main>
 </BaseLayout>
 
 <style>
   .home {
+    position: relative;
     min-height: 100dvh;
-    max-width: 680px;
-    margin-inline: auto;
-    padding: 10vh clamp(1rem, 5vw, 3rem);
-    color: #e5e7eb;
     background: #0a0a0b;
-    font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    color: #e5e7eb;
+    font-family: ui-monospace, 'JetBrains Mono', 'SFMono-Regular', Menlo, monospace;
+    overflow: hidden;
+  }
+
+  .home-hdr {
+    position: fixed;
+    top: clamp(1.2rem, 3vh, 2.4rem);
+    left: clamp(1.2rem, 3vw, 2.4rem);
+    z-index: 3;
+    pointer-events: none;
+    max-width: 28rem;
   }
   .home-title {
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-size: clamp(1.1rem, 2vw, 1.6rem);
     font-weight: 500;
     letter-spacing: -0.01em;
-    margin-block-end: 0.2em;
+    margin: 0;
+    mix-blend-mode: difference;
+    color: #f5f5f5;
   }
   .home-sub {
     color: #8b93a1;
-    margin-block-end: 2rem;
+    font-size: 0.85rem;
+    margin: 0.15rem 0 0;
   }
-  .home-note {
+  .home-hint {
+    position: fixed;
+    bottom: 1.2rem;
+    right: 1.2rem;
+    z-index: 3;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #454b55;
+    pointer-events: none;
+  }
+
+  .graph-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .graph-wrap :global(.graph-root) {
+    position: absolute;
+    inset: 0;
+  }
+  .graph-wrap :global(.graph-canvas) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background:
+      radial-gradient(ellipse at 20% 10%, #111319 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, #0d1018 0%, transparent 55%),
+      #07080a;
+    touch-action: none;
+  }
+  .graph-wrap :global(.graph-loading) {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
     color: #5a606b;
     font-size: 0.85rem;
-    margin-block-end: 1.5rem;
-    padding-block-end: 1rem;
-    border-block-end: 1px dashed #2a2e36;
+    letter-spacing: 0.2em;
+    text-transform: lowercase;
   }
-  .home-posts {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 1rem;
+
+  .parallel-nav {
+    position: absolute;
+    left: -99999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
   }
-  .home-posts a {
-    display: grid;
-    grid-template-columns: 7rem 1fr;
-    gap: 1.25rem;
-    padding: 0.9rem 1rem;
-    text-decoration: none;
-    color: #e5e7eb;
-    border: 1px solid #1f2329;
-    border-radius: 2px;
-    transition: border-color 150ms, background 150ms;
-  }
-  .home-posts a:hover {
-    border-color: #3a414b;
-    background: #101218;
-  }
-  .home-posts .cat {
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.16em;
-    align-self: center;
-  }
-  .home-posts .t {
-    font-size: 1.05rem;
-    color: #e5e7eb;
+
+  @media (max-width: 767px) {
+    .home {
+      overflow: auto;
+    }
+    .home-hdr {
+      position: static;
+      padding: clamp(1.5rem, 5vh, 3rem) clamp(1rem, 5vw, 2rem) 0.5rem;
+      max-width: none;
+    }
+    .home-title {
+      font-size: clamp(1.3rem, 5vw, 1.9rem);
+    }
+    .home-hint {
+      display: none;
+    }
+    .graph-wrap {
+      display: none;
+    }
+    .parallel-nav {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      padding: 1rem clamp(1rem, 5vw, 2rem) 4rem;
+    }
+    .parallel-nav h2 {
+      font-size: 0.75rem;
+      color: #5a606b;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      margin: 1rem 0 1.5rem;
+      padding-block-end: 0.8rem;
+      border-block-end: 1px dashed #2a2e36;
+      font-weight: 400;
+    }
+    .parallel-nav section {
+      margin-block-end: 2rem;
+    }
+    .parallel-nav h3 {
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin: 0 0 0.75rem;
+      font-weight: 500;
+    }
+    .parallel-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 0.2rem;
+    }
+    .parallel-nav a {
+      display: block;
+      padding: 0.7rem 0;
+      color: #e5e7eb;
+      text-decoration: none;
+      font-size: 1rem;
+      border-block-end: 1px solid #1a1d23;
+    }
+    .parallel-nav a:hover {
+      color: #fff;
+    }
   }
 </style>

@@ -13,8 +13,21 @@ const { title, category, created, tags } = Astro.props;
 ---
 
 <article class="post-main">
+  <div class="post-hero" aria-hidden="true"></div>
   <PostHeader title={title} category={category} created={created} tags={tags} />
   <div class="post-body">
     <slot />
   </div>
 </article>
+
+<style>
+  .post-hero {
+    view-transition-name: graph-node;
+    position: fixed;
+    inset: 0;
+    background: var(--color-primary, #41d982);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+</style>

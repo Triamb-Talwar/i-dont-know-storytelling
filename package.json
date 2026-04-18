@@ -12,7 +12,6 @@
     "astro": "astro",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
     "typecheck": "astro check",
     "format": "prettier --write ."
   },
@@ -27,7 +26,6 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.50.0",
     "@tailwindcss/vite": "^4.0.0",
     "@types/d3-force": "^3.0.10",
     "@types/react": "^19.0.0",
