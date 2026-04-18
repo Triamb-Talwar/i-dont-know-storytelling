@@ -23,6 +23,12 @@ const formatted = new Intl.DateTimeFormat('en-GB', {
   <div class="post-meta">
     <span class="cat-tag">{label}</span>
     <time datetime={created.toISOString()}>{formatted}</time>
-    {tags.length > 0 && <span class="tags">{tags.map((t) => `#${t}`).join(' ')}</span>}
+    {tags.length > 0 && (
+      <span class="tags">
+        {tags.map((t) => (
+          <a href={`/?tag=${t}`} class="tag-link" data-tag={t}>#{t}</a>
+        ))}
+      </span>
+    )}
   </div>
 </header>

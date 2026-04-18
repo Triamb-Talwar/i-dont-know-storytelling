@@ -99,6 +99,14 @@ export default function Graph() {
   const [size, setSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [payload, setPayload] = useState<GraphPayload | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  // Read ?tag= from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tag = params.get('tag');
+    if (tag) setActiveTag(tag);
+  }, []);
 
   // Fetch graph.json
   useEffect(() => {
@@ -242,7 +250,10 @@ export default function Graph() {
       const cfg = CATEGORY_CONFIG[n.category];
       const isHover = hovered && hovered.id === n.id;
       const isConn = connected?.has(n.id);
-      const desat = hovered && !isHover && !isConn ? 0.4 : ageSaturation(n.age_days);
+      const hasActiveTag = activeTag ? n.tags.includes(activeTag) : false;
+      const desat = hovered && !isHover && !isConn ? 0.4
+        : activeTag && !hasActiveTag ? 0.35
+        : ageSaturation(n.age_days);
 
       let x = n.x ?? 0;
       let y = n.y ?? 0;
@@ -256,11 +267,20 @@ export default function Graph() {
       const breath = prefersReducedMotion() ? 1 : breathScale(n.age_days, timeRef.current);
       const r = n.radius * (isHover ? 1.14 : breath);
 
-      // glow for hovered
+      // glow for hovered or tag-matched
       if (isHover) {
         ctx.save();
         ctx.shadowColor = cfg.primary;
         ctx.shadowBlur = 24;
+        drawNodeShape(ctx, cfg.shape, x, y, r);
+        ctx.fillStyle = cfg.primary;
+        ctx.fill();
+        ctx.restore();
+      } else if (hasActiveTag) {
+        const pulse = 0.5 + 0.5 * Math.sin(timeRef.current * 3);
+        ctx.save();
+        ctx.shadowColor = cfg.primary;
+        ctx.shadowBlur = 12 + pulse * 10;
         drawNodeShape(ctx, cfg.shape, x, y, r);
         ctx.fillStyle = cfg.primary;
         ctx.fill();
@@ -499,11 +519,58 @@ export default function Graph() {
       renderRef.current();
     };
 
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!simNodes.length) return;
+      const cur = hoverRef.current;
+      if (e.key === 'Enter' && cur != null) {
+        navigateToNode(simNodes[cur]);
+        return;
+      }
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) return;
+      e.preventDefault();
+      lastInteractionRef.current = performance.now();
+
+      if (cur == null) {
+        hoverRef.current = 0;
+        renderRef.current();
+        return;
+      }
+
+      const node = simNodes[cur];
+      const neighbors = adjacency.get(node.id);
+      if (!neighbors?.size && e.key !== 'Tab') return;
+
+      if (e.key === 'Tab') {
+        hoverRef.current = (cur + (e.shiftKey ? -1 : 1) + simNodes.length) % simNodes.length;
+      } else {
+        const nx = node.x ?? 0;
+        const ny = node.y ?? 0;
+        let best = -1;
+        let bestScore = Infinity;
+        for (let i = 0; i < simNodes.length; i++) {
+          if (i === cur) continue;
+          if (!neighbors?.has(simNodes[i].id)) continue;
+          const dx = (simNodes[i].x ?? 0) - nx;
+          const dy = (simNodes[i].y ?? 0) - ny;
+          let score = Infinity;
+          if (e.key === 'ArrowRight' && dx > 0) score = dx + Math.abs(dy) * 2;
+          if (e.key === 'ArrowLeft' && dx < 0) score = -dx + Math.abs(dy) * 2;
+          if (e.key === 'ArrowDown' && dy > 0) score = dy + Math.abs(dx) * 2;
+          if (e.key === 'ArrowUp' && dy < 0) score = -dy + Math.abs(dx) * 2;
+          if (score < bestScore) { bestScore = score; best = i; }
+        }
+        if (best >= 0) hoverRef.current = best;
+      }
+      renderRef.current();
+    };
+
+    canvas.setAttribute('tabindex', '0');
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
     canvas.addEventListener('pointercancel', onPointerUp);
     canvas.addEventListener('wheel', onWheel, { passive: false });
+    canvas.addEventListener('keydown', onKeyDown);
     canvas.style.cursor = 'grab';
 
     return () => {
@@ -512,6 +579,7 @@ export default function Graph() {
       canvas.removeEventListener('pointerup', onPointerUp);
       canvas.removeEventListener('pointercancel', onPointerUp);
       canvas.removeEventListener('wheel', onWheel);
+      canvas.removeEventListener('keydown', onKeyDown);
     };
   }, [simNodes, size.w, size.h]);
 

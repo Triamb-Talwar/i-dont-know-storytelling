@@ -31,3 +31,6 @@ Thumbs.db
 playwright-report/
 test-results/
 coverage/
+
+# Local Netlify folder
+.netlify

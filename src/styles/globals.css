@@ -74,6 +74,17 @@ p {
   margin: 0;
 }
 
+/* Tag links in post meta */
+.tag-link {
+  text-decoration: none;
+  color: inherit;
+  transition: color 150ms, opacity 150ms;
+  margin-inline-end: 0.5em;
+}
+.tag-link:hover {
+  color: var(--color-primary, #41d982);
+}
+
 /* AsciiCanvas — full-bleed scroll-driven ascii block */
 .ascii-wrap {
   display: block;
