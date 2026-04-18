@@ -1,0 +1,140 @@
+---
+// Dev-only variants sanity check. Renders 5 mock posts per category with
+// deterministic slugs (test-1 … test-5) so the author can eyeball that
+// all combinations look intentional. NOT linked from anywhere.
+// Returns 404 in production builds.
+
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { CATEGORIES, CATEGORY_CONFIG } from '@lib/categories';
+import { getVariants, variantsToDataAttrs } from '@lib/variations';
+import { hashSlug } from '@lib/seed';
+import CoffeeRing from '@components/post/variants/CoffeeRing.astro';
+
+if (import.meta.env.PROD) {
+  return new Response(null, { status: 404 });
+}
+
+const SLUGS = ['test-1', 'test-2', 'test-3', 'test-4', 'test-5'];
+
+const samples = CATEGORIES.flatMap((cat) =>
+  SLUGS.map((slug) => {
+    const variants = getVariants(cat, slug, new Date(2026, 0, 1));
+    return {
+      cat,
+      slug,
+      seed: hashSlug(slug),
+      variants,
+      attrs: variantsToDataAttrs(variants),
+    };
+  }),
+);
+---
+
+<BaseLayout title="variants debug">
+  <main class="vd-root">
+    <h1>variants debug</h1>
+    <p class="muted">
+      Each row is a mock post (<code>test-N</code>) under one category. Seeds and
+      picked variants are listed alongside a render preview. Same slug → same
+      picks every reload.
+    </p>
+
+    {CATEGORIES.map((cat) => (
+      <section class="vd-cat">
+        <h2 style={`color:${CATEGORY_CONFIG[cat].primary}`}>{cat}</h2>
+        <div class="vd-grid">
+          {samples
+            .filter((s) => s.cat === cat)
+            .map((s) => {
+              const jv = cat === 'journal' ? (s.variants as any) : null;
+              const inline =
+                cat === 'journal' && jv
+                  ? `--coffee-x:${jv.coffeeRingX}%;--coffee-y:${jv.coffeeRingY}%;--coffee-opacity:${jv.coffeeRingOpacity};`
+                  : '';
+              return (
+                <article
+                  class="vd-card"
+                  data-theme={cat}
+                  {...s.attrs}
+                  style={inline}
+                >
+                  <div class="vd-card-inner post-main">
+                    {cat === 'journal' && <CoffeeRing />}
+                    <header class="post-header">
+                      <h3 class="post-title">{s.slug}</h3>
+                      <div class="post-meta">
+                        <span class="cat-tag">{cat}</span>
+                        <time datetime="2026-01-01">Jan 1 2026</time>
+                      </div>
+                    </header>
+                    <div class="post-body">
+                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+                  </div>
+                  <pre class="vd-meta">seed: {s.seed}
+{JSON.stringify(s.variants, null, 2)}</pre>
+                </article>
+              );
+            })}
+        </div>
+      </section>
+    ))}
+  </main>
+</BaseLayout>
+
+<style>
+  .vd-root {
+    max-width: 1400px;
+    margin-inline: auto;
+    padding: 2rem clamp(1rem, 3vw, 2.5rem);
+    font-family: ui-monospace, 'JetBrains Mono', monospace;
+    color: #e5e7eb;
+    background: #0a0a0b;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 1.4rem;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    margin-block: 0 1rem;
+  }
+  .muted { color: #8b93a1; font-size: 0.85rem; max-width: 60ch; }
+  .vd-cat { margin-block: 3rem 2rem; }
+  .vd-cat h2 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-block: 0 1rem;
+    border-block-end: 1px solid #2a2e36;
+    padding-block-end: 0.4rem;
+  }
+  .vd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  .vd-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border: 1px solid #2a2e36;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #0e0e10;
+  }
+  .vd-card-inner {
+    position: relative;
+    min-height: 190px;
+    padding: 1rem;
+    overflow: hidden;
+  }
+  .vd-meta {
+    margin: 0;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.7rem;
+    line-height: 1.45;
+    color: #8b93a1;
+    border-block-start: 1px dashed #2a2e36;
+    white-space: pre-wrap;
+  }
+</style>
