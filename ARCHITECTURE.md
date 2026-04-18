@@ -93,6 +93,22 @@ src/components/
     └── CategoryPill.astro         # shows current category, clickable to filter graph
 ```
 
+```
+src/lib/
+├── categories.ts                  # single source of truth for cat config
+├── graph-data.ts                  # builds graph.json from frontmatter
+├── graph-data.test.ts
+├── seed.ts                        # mulberry32 PRNG, hash(slug) -> rng
+├── seed.test.ts                   # determinism + distribution tests
+└── variations/                    # per-category variation pickers
+    ├── index.ts                   # category -> picker dispatch
+    ├── tech.ts
+    ├── personal.ts
+    ├── political.ts
+    ├── media.ts
+    └── journal.ts
+```
+
 ## Data model (detailed)
 
 ### Post frontmatter schema (zod, in `src/content/config.ts`)
@@ -139,6 +155,10 @@ interface GraphData {
   }>;
 }
 ```
+
+### Seeded variations
+
+Each post's slug is hashed at build time into a 32-bit seed via `hashSlug(slug)` in `src/lib/seed.ts`. The seed is passed to the matching category picker (`src/lib/variations/<category>.ts`), which returns an object of chosen variants (ornament glyph, version tag, film ratio, etc.). Variants are written into the post HTML as `data-*` attributes on the post root element (e.g. `<article data-variant-ornament="❦" data-variant-rule="dotted">`), then consumed by CSS rules like `[data-variant-ornament="❦"] .section-break::after { content: "❦"; }`. No runtime JS required for CSS-driven variants. SVG-driven variants (ink blots, stamps, circuit traces) render server-side into the HTML via small Astro components that accept the seed and emit inline SVG.
 
 ## Transition architecture
 

@@ -188,6 +188,33 @@ On entering a node, a single concentric ripple emanates from the center in the n
 ### 10. Tag constellations
 Hovering a tag in post metadata: all other nodes with that tag pulse gently. Temporary "tag graph" overlay on the regular graph. Lets users explore by topic, not just by link.
 
+## Per-post seeded variation ("siblings not clones")
+
+Within a category, every post should feel like a member of a family but visually distinct. Achieved with seeded determinism: `seed = hash(slug)`, then all variations are chosen from banks using that seed. Same post → same visual every time. Different post → different visual.
+
+Implementation lives in `src/lib/seed.ts` (mulberry32 PRNG) and per-category variation pickers in `src/lib/variations/<category>.ts` that consume the seed.
+
+### Variation banks per category
+
+**Tech** — header version tag (`v0.3.17` from hash), prompt char (`$ > # ~ ❯`), bullet glyph (`• ▸ ▪ ◦ › ▫`), scanline gap (1/2/3px), seeded circuit-trace SVG along one edge, corner watermark (`[CTRL+C]` / `[ESC]` / `[^Z]` / `[TAB]`) at seeded position.
+
+**Personal** — wobbly rough.js underline on links (seeded roughness 0.5–1.5), ink-blot SVG in margin at seeded position + rotation, drop-cap font from a 3-font bank, marginalia rotation (2–8°), rough.js bullets.
+
+**Political** — section-break ornament (`✦ ❦ § ¶ ❧ ❖ ✧`), column-rule style (solid / dotted / double), masthead "Issue №" (deterministic from date + slug), weathered stamp SVG in corner (seeded rotation 3–15°, opacity 0.08–0.15).
+
+**Media** — filmic tint (warm / cool / neutral), letterbox ratio (2.39:1 / 2.35:1 / 1.85:1), film-reel countdown number (1–9), subtitle-style timestamp at top (`00:01:24` from hash).
+
+**Journal** — paper-corner-fold (TL / TR / BL / BR), date-stamp style (3 variants), margin-note position, seeded coffee-ring blot SVG at low opacity and seeded position.
+
+### Rules
+
+- Variations are chosen at build time in the post layout and passed as `data-*` attrs / CSS custom props. Zero runtime cost per post load for CSS-driven variants.
+- Every variation must be cheap: a glyph, a CSS property value, or an SVG with ≤10 path commands.
+- New variations require adding to the bank plus a visual review of 5 random seeds to ensure all combinations look intentional.
+- Variations must respect `prefers-reduced-motion` (drop any animated ones) and may be simplified or dropped on mobile.
+- Start with 3–4 variants per category. Grow the banks over time as posts start feeling samey. Resist the urge to design 20 variants up front.
+- Libraries: **rough.js** (<9kB gzipped, for personal/journal only — don't add to other categories), **simplex-noise** (~2kb, only if genuinely needed), **mulberry32** inlined (zero deps).
+
 ## Typography rules (project-wide)
 
 - **NEVER use:** Inter, Roboto, Arial, generic system font stack, Space Grotesk

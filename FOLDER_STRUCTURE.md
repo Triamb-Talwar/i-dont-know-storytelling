@@ -95,6 +95,15 @@ i-dont-know-storytelling/
 │   │   ├── graph-data.ts          # builds graph.json from frontmatter
 │   │   ├── graph-data.test.ts
 │   │   ├── categories.ts          # single source of truth for cat config
+│   │   ├── seed.ts                # mulberry32 PRNG, hash(slug) -> rng
+│   │   ├── seed.test.ts           # determinism + distribution tests
+│   │   ├── variations/            # per-category variation pickers
+│   │   │   ├── index.ts           # category -> picker dispatch
+│   │   │   ├── tech.ts
+│   │   │   ├── personal.ts
+│   │   │   ├── political.ts
+│   │   │   ├── media.ts
+│   │   │   └── journal.ts
 │   │   ├── theme-tokens.ts
 │   │   └── utils.ts
 │   │
