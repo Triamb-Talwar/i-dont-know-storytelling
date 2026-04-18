@@ -12,7 +12,7 @@ interface Props {
 const { title, category, created, tags } = Astro.props;
 ---
 
-<article class="post-main">
+<article class="post-main" id="main-content">
   <div class="post-hero" aria-hidden="true"></div>
   <PostHeader title={title} category={category} created={created} tags={tags} />
   <div class="post-body">
@@ -31,3 +31,29 @@ const { title, category, created, tags } = Astro.props;
     z-index: -1;
   }
 </style>
+
+<script>
+  const KEY_PREFIX = 'idks_visited_';
+  const slug = window.location.pathname.replace(/^\/posts\//, '').replace(/\/$/, '');
+  const visited = sessionStorage.getItem(KEY_PREFIX + slug);
+
+  if (!visited && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    sessionStorage.setItem(KEY_PREFIX + slug, '1');
+    const titleEl = document.querySelector('.post-title');
+    if (titleEl) {
+      const full = titleEl.textContent || '';
+      titleEl.textContent = '';
+      let i = 0;
+      const tick = () => {
+        if (i <= full.length) {
+          titleEl.textContent = full.slice(0, i) + (i < full.length ? '▌' : '');
+          i++;
+          requestAnimationFrame(() => setTimeout(tick, 28 + Math.random() * 22));
+        } else {
+          titleEl.textContent = full;
+        }
+      };
+      tick();
+    }
+  }
+</script>

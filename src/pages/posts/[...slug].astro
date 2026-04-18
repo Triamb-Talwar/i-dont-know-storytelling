@@ -14,10 +14,86 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 const { title, category, created, tags } = post.data;
+
+const allPosts = await getCollection('posts', ({ data }) => data.visibility === 'public');
+const slugCategoryMap: Record<string, string> = {};
+for (const p of allPosts) {
+  slugCategoryMap[p.data.slug] = p.data.category;
+}
 ---
 
 <BaseLayout title={`${title} · i don't know storytelling`} theme={category}>
   <PostView title={title} category={category} created={created} tags={tags}>
     <Content />
   </PostView>
+
+  <script
+    id="slug-categories"
+    type="application/json"
+    set:html={JSON.stringify(slugCategoryMap)}
+  />
+
+  <script>
+    import { CATEGORY_CONFIG } from '@lib/categories';
+    import type { Category } from '@lib/categories';
+
+    const currentTheme = document.documentElement.dataset.theme as Category | undefined;
+    if (!currentTheme) throw new Error('no theme');
+
+    const mapEl = document.getElementById('slug-categories');
+    const slugMap: Record<string, Category> = mapEl ? JSON.parse(mapEl.textContent || '{}') : {};
+
+    function resolveSlug(href: string): string | null {
+      const m = href.match(/\/posts\/([^/]+)\/?$/);
+      if (m) return m[1];
+      const m2 = href.match(/^\.\/([^/]+)\/?$/);
+      if (m2) return m2[1];
+      return null;
+    }
+
+    document.querySelector('.post-body')?.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest('a');
+      if (!a) return;
+      const href = a.getAttribute('href');
+      if (!href) return;
+
+      const slug = resolveSlug(href);
+      if (!slug) return;
+
+      const targetCat = slugMap[slug];
+      if (!targetCat || targetCat === currentTheme) return;
+
+      // Cross-category link — trigger two-rivers wipe
+      e.preventDefault();
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const dest = `/posts/${slug}`;
+
+      if (reduced) {
+        window.location.href = dest;
+        return;
+      }
+
+      const fromColor = CATEGORY_CONFIG[currentTheme].primary;
+      const toColor = CATEGORY_CONFIG[targetCat].primary;
+
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+        background: linear-gradient(105deg, ${fromColor} 0%, ${fromColor} 45%, ${toColor} 55%, ${toColor} 100%);
+        clip-path: inset(0 100% 0 0); opacity: 0;
+      `;
+      document.body.appendChild(overlay);
+
+      overlay.animate(
+        [
+          { clipPath: 'inset(0 100% 0 0)', opacity: 0.7 },
+          { clipPath: 'inset(0 50% 0 0)', opacity: 1, offset: 0.35 },
+          { clipPath: 'inset(0 0 0 0)', opacity: 1 },
+        ],
+        { duration: 620, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' },
+      ).onfinish = () => {
+        window.location.href = dest;
+      };
+    });
+  </script>
 </BaseLayout>

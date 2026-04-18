@@ -37,6 +37,35 @@ const DRAG_THRESHOLD = 4;
 const IDLE_MS = 8000;
 const HOVER_LIFT = 3;
 const CONNECTED_LEAN = 0.05;
+const BREADCRUMB_DECAY_MS = 30_000;
+const BREADCRUMB_KEY = 'idks_breadcrumbs';
+
+function getBreadcrumbs(): { edge: string; t: number }[] {
+  try {
+    const raw = sessionStorage.getItem(BREADCRUMB_KEY);
+    if (!raw) return [];
+    const items = JSON.parse(raw) as { edge: string; t: number }[];
+    const now = Date.now();
+    return items.filter((b) => now - b.t < BREADCRUMB_DECAY_MS);
+  } catch {
+    return [];
+  }
+}
+
+function addBreadcrumb(fromId: string, toId: string): void {
+  try {
+    const key = [fromId, toId].sort().join('::');
+    const crumbs = getBreadcrumbs();
+    crumbs.push({ edge: key, t: Date.now() });
+    sessionStorage.setItem(BREADCRUMB_KEY, JSON.stringify(crumbs.slice(-20)));
+  } catch { /* noop */ }
+}
+
+function breathScale(ageDays: number, t: number): number {
+  const speed = ageDays < 30 ? 1.8 : ageDays < 180 ? 1.2 : 0.7;
+  const amp = ageDays < 30 ? 0.035 : 0.018;
+  return 1 + Math.sin(t * speed) * amp;
+}
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined') return false;
@@ -65,6 +94,7 @@ export default function Graph() {
   } | null>(null);
   const lastInteractionRef = useRef<number>(performance.now());
   const driftAngleRef = useRef<number>(Math.random() * Math.PI * 2);
+  const timeRef = useRef<number>(0);
 
   const [size, setSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [payload, setPayload] = useState<GraphPayload | null>(null);
@@ -146,6 +176,11 @@ export default function Graph() {
 
     const hovered = hoverRef.current != null ? simNodes[hoverRef.current] : null;
     const connected = hovered ? adjacency.get(hovered.id) ?? new Set() : null;
+    const now = Date.now();
+    const crumbs = getBreadcrumbs();
+    const crumbSet = new Map<string, number>();
+    for (const c of crumbs) crumbSet.set(c.edge, 1 - (now - c.t) / BREADCRUMB_DECAY_MS);
+    timeRef.current += 0.016;
 
     // edges
     ctx.lineCap = 'round';
@@ -161,11 +196,20 @@ export default function Graph() {
       let highlight = false;
       if (hovered && (s.id === hovered.id || t.id === hovered.id)) highlight = true;
 
+      const edgeKey = [s.id, t.id].sort().join('::');
+      const crumbStrength = crumbSet.get(edgeKey) ?? 0;
+
       if (highlight) {
         const cfg = CATEGORY_CONFIG[hovered!.category];
         ctx.strokeStyle = cfg.primary;
         ctx.globalAlpha = 0.9;
         ctx.lineWidth = 2 / cam.k;
+      } else if (crumbStrength > 0) {
+        ctx.strokeStyle = CATEGORY_CONFIG[s.category].primary;
+        ctx.globalAlpha = 0.3 + crumbStrength * 0.5;
+        ctx.lineWidth = (1.5 + crumbStrength) / cam.k;
+        ctx.shadowColor = CATEGORY_CONFIG[s.category].primary;
+        ctx.shadowBlur = 8 * crumbStrength;
       } else if (hovered) {
         ctx.strokeStyle = '#2a2e36';
         ctx.globalAlpha = 0.25;
@@ -176,7 +220,6 @@ export default function Graph() {
         ctx.lineWidth = 1 / cam.k;
       }
 
-      // subtle curve
       const mx = (sx + tx) / 2;
       const my = (sy + ty) / 2;
       const dx = tx - sx;
@@ -189,6 +232,7 @@ export default function Graph() {
       ctx.moveTo(sx, sy);
       ctx.quadraticCurveTo(mx + nx * bow, my + ny * bow, tx, ty);
       ctx.stroke();
+      ctx.shadowBlur = 0;
     }
     ctx.globalAlpha = 1;
 
@@ -209,7 +253,8 @@ export default function Graph() {
       }
       if (isHover) y -= HOVER_LIFT;
 
-      const r = n.radius * (isHover ? 1.14 : 1);
+      const breath = prefersReducedMotion() ? 1 : breathScale(n.age_days, timeRef.current);
+      const r = n.radius * (isHover ? 1.14 : breath);
 
       // glow for hovered
       if (isHover) {
@@ -237,13 +282,19 @@ export default function Graph() {
       // label on hover only
       if (isHover) {
         ctx.save();
-        ctx.fillStyle = '#e5e7eb';
-        ctx.font = `500 ${13 / cam.k}px ui-monospace, "JetBrains Mono", monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        const tokens = wrapLabel(n.title, 26);
-        for (let li = 0; li < tokens.length; li++) {
-          ctx.fillText(tokens[li], x, y + r + 10 / cam.k + (li * 16) / cam.k);
+        if (n.visibility === 'private') {
+          ctx.fillStyle = '#8b93a1';
+          ctx.font = `500 ${12 / cam.k}px ui-monospace, "JetBrains Mono", monospace`;
+          ctx.fillText('🔒 private', x, y + r + 10 / cam.k);
+        } else {
+          ctx.fillStyle = '#e5e7eb';
+          ctx.font = `500 ${13 / cam.k}px ui-monospace, "JetBrains Mono", monospace`;
+          const tokens = wrapLabel(n.title, 26);
+          for (let li = 0; li < tokens.length; li++) {
+            ctx.fillText(tokens[li], x, y + r + 10 / cam.k + (li * 16) / cam.k);
+          }
         }
         ctx.restore();
       }
@@ -324,6 +375,14 @@ export default function Graph() {
   };
 
   const navigateToNode = (node: SimNode, event?: MouseEvent | PointerEvent) => {
+    if (node.visibility === 'private') return; // private nodes are teasers only
+
+    // record breadcrumb from any previously hovered node
+    if (hoverRef.current != null) {
+      const from = simNodes[hoverRef.current];
+      if (from && from.id !== node.id) addBreadcrumb(from.id, node.id);
+    }
+
     const href = `/posts/${node.id}`;
     const vt = (document as Document & {
       startViewTransition?: (cb: () => void) => { finished: Promise<void> };
