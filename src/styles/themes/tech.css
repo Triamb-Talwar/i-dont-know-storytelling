@@ -127,3 +127,74 @@
   font-family: var(--font-code);
   margin-block: 1.8em;
 }
+
+/* ==========================================================================
+   Per-post seeded variations (tech)
+   ========================================================================== */
+
+[data-theme='tech'] .post-main { position: relative; }
+
+/* Prompt char before title — override the hardcoded default when a variant
+   is present. Without a variant we keep the '$ ' baseline. */
+[data-theme='tech'][data-variant-promptChar='$']  .post-title::before { content: '$ '; }
+[data-theme='tech'][data-variant-promptChar='>']  .post-title::before { content: '> '; }
+[data-theme='tech'][data-variant-promptChar='#']  .post-title::before { content: '# '; }
+[data-theme='tech'][data-variant-promptChar='~']  .post-title::before { content: '~ '; }
+[data-theme='tech'][data-variant-promptChar='\276F'] .post-title::before { content: '\276F  '; }
+
+/* Bullet glyph for unordered list markers. Using ::marker content strings
+   works in modern Chromium/Firefox/Safari; older fallbacks get browser default. */
+[data-theme='tech'][data-variant-bulletGlyph='\2022'] .post-body ul li::marker { content: '\2022  '; color: var(--color-primary); }
+[data-theme='tech'][data-variant-bulletGlyph='\25B8'] .post-body ul li::marker { content: '\25B8  '; color: var(--color-primary); }
+[data-theme='tech'][data-variant-bulletGlyph='\25AA'] .post-body ul li::marker { content: '\25AA  '; color: var(--color-primary); }
+[data-theme='tech'][data-variant-bulletGlyph='\25E6'] .post-body ul li::marker { content: '\25E6  '; color: var(--color-primary); }
+[data-theme='tech'][data-variant-bulletGlyph='\203A'] .post-body ul li::marker { content: '\203A  '; color: var(--color-primary); }
+[data-theme='tech'][data-variant-bulletGlyph='\25AB'] .post-body ul li::marker { content: '\25AB  '; color: var(--color-primary); }
+
+/* Scanline overlay — a low-contrast diagonal line pattern, gapped by variant.
+   Pointer-events: none so it never eats clicks. Sits below text via z-index:0
+   and the parent's children (which establish their own stacking context as
+   needed) remain above. */
+[data-theme='tech'] .post-main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.045;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-primary) 0 1px,
+    transparent 1px var(--scanline-gap, 3px)
+  );
+}
+[data-theme='tech'][data-variant-scanlineGap='1'] .post-main::after { --scanline-gap: 2px; }
+[data-theme='tech'][data-variant-scanlineGap='2'] .post-main::after { --scanline-gap: 3px; }
+[data-theme='tech'][data-variant-scanlineGap='3'] .post-main::after { --scanline-gap: 4px; }
+
+/* Corner watermark — single-line monospace tag in the corner.
+   Renders via ::before on .post-main, positioned per watermarkCorner. */
+[data-theme='tech'] .post-main::before {
+  position: absolute;
+  font-family: var(--font-code);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: color-mix(in oklab, var(--color-muted) 70%, transparent);
+  pointer-events: none;
+  padding: 0.2em 0.4em;
+  border: 1px solid color-mix(in oklab, var(--color-muted) 35%, transparent);
+  border-radius: 2px;
+  z-index: 1;
+}
+[data-theme='tech'][data-variant-watermarkLabel='CTRL+C'] .post-main::before { content: '[CTRL+C]'; }
+[data-theme='tech'][data-variant-watermarkLabel='ESC']    .post-main::before { content: '[ESC]'; }
+[data-theme='tech'][data-variant-watermarkLabel='^Z']     .post-main::before { content: '[^Z]'; }
+[data-theme='tech'][data-variant-watermarkLabel='TAB']    .post-main::before { content: '[TAB]'; }
+[data-theme='tech'][data-variant-watermarkCorner='tl'] .post-main::before { top: 0.8rem;    left: 0.8rem;  }
+[data-theme='tech'][data-variant-watermarkCorner='tr'] .post-main::before { top: 0.8rem;    right: 0.8rem; }
+[data-theme='tech'][data-variant-watermarkCorner='bl'] .post-main::before { bottom: 0.8rem; left: 0.8rem;  }
+[data-theme='tech'][data-variant-watermarkCorner='br'] .post-main::before { bottom: 0.8rem; right: 0.8rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='tech'] .post-main::after { opacity: 0.025; }
+}
