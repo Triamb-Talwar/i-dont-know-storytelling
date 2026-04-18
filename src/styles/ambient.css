@@ -1,0 +1,183 @@
+/* Ambient category watermarks — a single fixed-position <div class="ambient"> behind content.
+   Each category gets its own pattern, low opacity, slowly drifting. */
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient::before,
+  .ambient::after {
+    animation: none !important;
+  }
+}
+
+/* ── tech: binary columns streaming down the right gutter ── */
+.ambient[data-ambient='tech']::before {
+  content:
+    '01010011 10101100 11010010 00110101\A'
+    '10001110 01011001 10110011 01001100\A'
+    '01110010 11000110 00101010 11001010\A'
+    '10011001 01100101 11101010 00110110\A'
+    '01001101 10110011 01001001 11010011\A'
+    '11001100 00110011 10101010 01010101\A'
+    '01100110 10011001 11000011 00111100\A'
+    '10100101 01011010 10010110 01101001\A';
+  position: absolute;
+  top: -20vh;
+  right: 2vw;
+  white-space: pre;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+  color: var(--color-primary);
+  opacity: 0.05;
+  animation: ambient-tech-drip 40s linear infinite;
+}
+
+@keyframes ambient-tech-drip {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(50vh);
+  }
+}
+
+/* ── personal: soft floral wave undulating across the top ── */
+.ambient[data-ambient='personal']::before {
+  content: '';
+  position: absolute;
+  top: -30vh;
+  left: -10vw;
+  width: 140vw;
+  height: 70vh;
+  background-image: radial-gradient(
+      ellipse 600px 160px at 20% 30%,
+      color-mix(in oklch, var(--color-primary) 25%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 400px 120px at 70% 60%,
+      color-mix(in oklch, var(--color-accent) 18%, transparent),
+      transparent 70%
+    );
+  opacity: 0.5;
+  animation: ambient-personal-float 24s ease-in-out infinite alternate;
+  filter: blur(20px);
+}
+
+@keyframes ambient-personal-float {
+  from {
+    transform: translateX(-2vw) translateY(0);
+  }
+  to {
+    transform: translateX(4vw) translateY(2vh);
+  }
+}
+
+/* ── political: horizontal redaction bars slowly ticking leftward ── */
+.ambient[data-ambient='political']::before {
+  content:
+    '████████    ██████          ████████   ██████████      ████\A'
+    '      ████████    ███████████        ████       ██████████\A'
+    '██████     ████████        ███████████     ████      ████\A'
+    '    ██████████      ████████     ███████████    ████████\A';
+  position: absolute;
+  top: 10vh;
+  left: 0;
+  width: 200vw;
+  white-space: pre;
+  font-family: 'PT Serif', serif;
+  font-size: 1rem;
+  line-height: 3rem;
+  color: var(--color-primary);
+  opacity: 0.04;
+  animation: ambient-political-tick 80s linear infinite;
+}
+
+@keyframes ambient-political-tick {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50vw);
+  }
+}
+
+/* ── media: CRT scanlines + slow horizontal sweep ── */
+.ambient[data-ambient='media']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    color-mix(in oklch, var(--color-primary) 20%, transparent) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: 0.08;
+  mix-blend-mode: screen;
+}
+
+.ambient[data-ambient='media']::after {
+  content: '';
+  position: absolute;
+  inset: -5% 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in oklch, var(--color-primary) 40%, transparent) 48%,
+    color-mix(in oklch, var(--color-primary) 60%, transparent) 50%,
+    color-mix(in oklch, var(--color-primary) 40%, transparent) 52%,
+    transparent 100%
+  );
+  opacity: 0.06;
+  mix-blend-mode: screen;
+  animation: ambient-media-sweep 9s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes ambient-media-sweep {
+  from {
+    transform: translateY(-40%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* ── journal: small dotted cross marks at paper-grid intersections, slight float ── */
+.ambient[data-ambient='journal']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in oklch, var(--color-primary) 60%, transparent) 0.6px,
+    transparent 1.2px
+  );
+  background-size: 48px 48px;
+  background-position: 0 0;
+  opacity: 0.3;
+  animation: ambient-journal-float 90s linear infinite;
+}
+
+@keyframes ambient-journal-float {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 48px;
+  }
+}
+
+/* Make sure content sits above the ambient layer */
+.post-main {
+  position: relative;
+  z-index: 1;
+}

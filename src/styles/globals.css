@@ -7,6 +7,7 @@
 @import './themes/political.css';
 @import './themes/media.css';
 @import './themes/journal.css';
+@import './ambient.css';
 
 /* Base reset + typography baseline */
 *,
@@ -55,6 +56,36 @@ h4 {
 
 p {
   margin: 0;
+}
+
+/* AsciiCanvas — inline scroll-driven ascii block */
+.ascii-wrap {
+  display: block;
+  margin-block: clamp(2rem, 5vh, 3.5rem);
+  overflow-x: auto;
+  color: var(--ascii-fg, currentColor);
+  font-variant-ligatures: none;
+}
+.ascii-wrap.ascii-center {
+  text-align: center;
+}
+.ascii-wrap.ascii-right {
+  text-align: right;
+}
+.ascii-wrap.ascii-left {
+  text-align: left;
+}
+.ascii-pre {
+  display: inline-block;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-family: ui-monospace, 'JetBrains Mono', 'IBM Plex Mono', Menlo, monospace;
+  font-size: var(--ascii-size, 0.75rem);
+  line-height: 1.05;
+  white-space: pre;
+  letter-spacing: 0;
+  min-height: 1em;
+  text-align: left;
 }
 
 /* View transitions — graph node expands into post hero */

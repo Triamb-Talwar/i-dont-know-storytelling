@@ -33,6 +33,7 @@ const fontsHref = theme ? googleFontsHref(theme) : null;
     {fontsHref && <link rel="stylesheet" href={fontsHref} />}
   </head>
   <body>
+    {theme && <div class="ambient" aria-hidden="true" data-ambient={theme} />}
     <slot />
   </body>
 </html>
