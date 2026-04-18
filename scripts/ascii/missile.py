@@ -1,13 +1,13 @@
-"""Missile glides left -> right leaving a heavy smoke trail, arcs downward, impacts, BIG explosion."""
+"""Missile drops vertically, accelerating under gravity, then detonates on impact."""
 from __future__ import annotations
 
 import math
 import random
 from _lib import blank, plot, write_frames
 
-COLS = 140
-ROWS = 38
-FRAMES = 72
+COLS = 60
+ROWS = 44
+FRAMES = 70
 SEED = 7
 
 
@@ -15,139 +15,136 @@ def main() -> None:
     random.seed(SEED)
     frames: list[list[list[str]]] = []
 
-    start_x, start_y = 4, 28
-    impact_x, impact_y = COLS - 12, 30
-    apex_y = 5
-    flight_frames = int(FRAMES * 0.6)
+    cx = COLS // 2
+    ground_y = ROWS - 2
+    drop_start = 2
+    flight_frames = int(FRAMES * 0.55)
     explosion_frames = FRAMES - flight_frames
 
     trail: list[tuple[int, int, int]] = []
-    smoke: list[tuple[int, int, int, str]] = []
+    smoke: list[tuple[int, int, int]] = []
 
     for fi in range(flight_frames):
         g = blank(ROWS, COLS)
+        # eased drop (gravity: quadratic ease-in)
         t = fi / max(1, flight_frames - 1)
-        x = start_x + (impact_x - start_x) * t
-        y = (1 - t) * (1 - t) * start_y + 2 * (1 - t) * t * apex_y + t * t * impact_y
-        ix, iy = int(round(x)), int(round(y))
+        t_eased = t * t  # accelerating
+        my = drop_start + (ground_y - 4 - drop_start) * t_eased
+        mx = cx + int(math.sin(t * 3) * 2)  # slight wobble
+        iy = int(round(my))
+        ix = int(round(mx))
 
-        # age trail + smoke
-        trail = [(tx, ty, ta + 1) for (tx, ty, ta) in trail if ta + 1 < 30]
+        # trail
+        trail = [(tx, ty, ta + 1) for tx, ty, ta in trail if ta + 1 < 22]
         trail.append((ix, iy, 0))
 
-        # add smoke particles drifting upward from trail
-        if fi > 2 and fi % 2 == 0:
-            for sx_off in range(-1, 2):
-                smoke.append((ix - 3 + sx_off, iy + random.randint(-1, 1), 0, random.choice("░▒▓")))
+        # smoke puffs drift outward
+        if fi > 3 and fi % 2 == 0:
+            for dx in range(-1, 2):
+                smoke.append((ix + dx + random.randint(-1, 1), iy - 2, 0))
+        smoke = [(sx, sy - (1 if random.random() < 0.3 else 0), sa + 1)
+                 for sx, sy, sa in smoke if sa < 16]
 
-        smoke = [(sx, sy - (1 if sa % 4 == 0 else 0), sa + 1, sc) for sx, sy, sa, sc in smoke if sa + 1 < 20]
+        # draw smoke
+        for sx, sy, sa in smoke:
+            ch = "░" if sa > 10 else ("▒" if sa > 5 else "▓")
+            plot(g, sx + random.randint(-1, 0), sy, ch)
 
-        for sx, sy, sa, sc in smoke:
-            alpha_ch = "░" if sa > 12 else ("▒" if sa > 6 else sc)
-            plot(g, sx, sy, alpha_ch)
-
+        # draw trail
         for tx, ty, ta in trail:
             if ta == 0:
                 continue
-            if ta < 4:
-                ch = "█"
-            elif ta < 8:
-                ch = "▓"
-            elif ta < 14:
-                ch = "▒"
-            elif ta < 20:
-                ch = "░"
+            if ta < 3:
+                ch = "║"
+            elif ta < 6:
+                ch = "│"
+            elif ta < 12:
+                ch = "¦"
             else:
                 ch = "·"
             plot(g, tx, ty, ch)
 
-        # missile body — big, chunky
-        missile_art = [
-            "  ╱▔▔╲",
-            "━━╋══►",
-            "  ╲▁▁╱",
+        # missile body — pointing down
+        missile = [
+            "  ╱╲  ",
+            " ╱  ╲ ",
+            " │▓▓│ ",
+            " │▓▓│ ",
+            " │██│ ",
+            "╱╲██╱╲",
+            "╲╱╲╱╲╱",
         ]
-        for dy, row_str in enumerate(missile_art):
-            chars_list = list(row_str)
-            for dx, ch in enumerate(chars_list):
+        for dy, row_str in enumerate(missile):
+            for dx, ch in enumerate(row_str):
                 if ch != " ":
-                    plot(g, ix - 4 + dx, iy - 1 + dy, ch)
+                    plot(g, ix - 3 + dx, iy + dy, ch)
 
-        # flame exhaust
-        flame_chars = "~≈≋∽" if fi % 2 == 0 else "≈~∽≋"
-        for fx in range(1, 5 + random.randint(0, 3)):
-            plot(g, ix - 4 - fx, iy, random.choice(flame_chars))
-            if random.random() > 0.5:
-                plot(g, ix - 4 - fx, iy - 1, random.choice("·."))
-            if random.random() > 0.5:
-                plot(g, ix - 4 - fx, iy + 1, random.choice("·."))
+        # flame exhaust shooting upward
+        flame_w = 2 + (fi % 3)
+        for fy in range(1, 4 + random.randint(0, 3)):
+            for fdx in range(-flame_w, flame_w + 1):
+                if random.random() < 0.5:
+                    fch = random.choice("~≈≋∽^")
+                    plot(g, ix + fdx, iy - fy, fch)
 
-        # ground line — rough terrain
+        # ground
         for gx in range(COLS):
-            terrain_ch = "▄" if (gx + fi) % 7 < 2 else ("▂" if gx % 11 < 3 else "▁")
-            plot(g, gx, ROWS - 1, terrain_ch)
-            if gx % 13 == 0:
-                plot(g, gx, ROWS - 2, "▖")
+            plot(g, gx, ground_y, "▔" if gx % 9 < 2 else "▁")
+            plot(g, gx, ground_y + 1, "▓" if (gx + 3) % 7 < 2 else "░")
 
         frames.append(g)
 
-    # EXPLOSION — expanding concentric blast, debris, shockwave
-    blast_chars = ["█", "▓", "▒", "░", "#", "X", "x", "*", "+", ".", "·", " "]
+    # EXPLOSION
+    blast = ["█", "▓", "▒", "░", "#", "X", "x", "*", "+", ".", "·", " "]
 
     for fi in range(explosion_frames):
         g = blank(ROWS, COLS)
         t = fi / max(1, explosion_frames - 1)
 
-        # fading smoke from trail
-        smoke = [(sx, sy - (1 if sa % 3 == 0 else 0), sa + 1, sc) for sx, sy, sa, sc in smoke if sa + 1 < 30]
-        for sx, sy, sa, sc in smoke:
-            if sa < 20:
-                plot(g, sx, sy, "░" if sa > 14 else "▒")
+        radius = 2 + t * (ROWS * 0.5)
+        density = max(0.12, 1 - max(0, t - 0.2) / 0.8)
 
-        radius = 2 + t * (min(COLS, ROWS) * 0.55)
-        density = max(0.15, 1 - max(0, t - 0.25) / 0.75)
-
-        # multiple concentric rings
+        # rings
         for r_off in range(-3, 5):
-            rr = max(1, radius + r_off * 1.2)
-            steps = max(24, int(2 * math.pi * rr * 1.5))
+            rr = max(1, radius + r_off * 1.0)
+            steps = max(20, int(2 * math.pi * rr * 1.3))
             for s in range(steps):
-                a = (s / steps) * 2 * math.pi + fi * 0.05 + r_off * 0.1
-                px = impact_x + math.cos(a) * rr * 1.8
-                py = impact_y + math.sin(a) * rr * 0.7
+                a = (s / steps) * 2 * math.pi + fi * 0.06
+                px = cx + math.cos(a) * rr * 1.1
+                py = ground_y - 2 + math.sin(a) * rr * 0.85
                 if random.random() > density:
                     continue
-                ix_e, iy_e = int(round(px)), int(round(py))
-                rank = min(len(blast_chars) - 1, int(t * (len(blast_chars) - 1)) + max(0, r_off + 2) // 2)
-                plot(g, ix_e, iy_e, blast_chars[rank])
+                rank = min(len(blast) - 1, int(t * (len(blast) - 1)) + max(0, r_off + 2) // 2)
+                plot(g, int(round(px)), int(round(py)), blast[rank])
 
-        # flying debris
-        for _ in range(int(40 * density)):
+        # debris flying upward
+        for _ in range(int(30 * density)):
             a = random.random() * 2 * math.pi
-            rr = radius * (0.3 + random.random() * 0.8)
-            deb_x = impact_x + int(round(math.cos(a) * rr * 1.8))
-            deb_y = impact_y + int(round(math.sin(a) * rr * 0.7))
-            plot(g, deb_x, deb_y, random.choice("*+x#%@!"))
+            rr = radius * (0.2 + random.random() * 0.9)
+            dx = cx + int(round(math.cos(a) * rr * 1.1))
+            dy = ground_y - 2 + int(round(math.sin(a) * rr * 0.85))
+            plot(g, dx, dy, random.choice("*+x#@!%"))
 
-        # shockwave ring (outer edge only)
-        if fi < explosion_frames * 0.6:
-            sw_r = radius * 1.3
-            sw_steps = max(30, int(2 * math.pi * sw_r * 1.5))
+        # shockwave
+        if fi < explosion_frames * 0.5:
+            sw_r = radius * 1.2
+            sw_steps = max(20, int(2 * math.pi * sw_r))
             for s in range(sw_steps):
                 a = (s / sw_steps) * 2 * math.pi
-                sw_x = impact_x + int(round(math.cos(a) * sw_r * 1.8))
-                sw_y = impact_y + int(round(math.sin(a) * sw_r * 0.7))
-                if random.random() < 0.6:
-                    plot(g, sw_x, sw_y, random.choice("·."))
+                sw_x = cx + int(round(math.cos(a) * sw_r * 1.1))
+                sw_y = ground_y - 2 + int(round(math.sin(a) * sw_r * 0.85))
+                if random.random() < 0.5:
+                    plot(g, sw_x, sw_y, "·")
 
-        # ground — broken up by impact
+        # ground — cratered
         for gx in range(COLS):
-            dist_from_impact = abs(gx - impact_x)
-            if dist_from_impact < radius * 1.5 and fi < explosion_frames * 0.7:
-                if random.random() < 0.3:
-                    plot(g, gx, ROWS - 1, random.choice("▁▂▃"))
+            d = abs(gx - cx)
+            if d < radius * 0.8 and t < 0.7:
+                if random.random() < 0.25:
+                    plot(g, gx, ground_y, random.choice("▁░"))
             else:
-                plot(g, gx, ROWS - 1, "▁")
+                plot(g, gx, ground_y, "▁")
+                plot(g, gx, ground_y + 1, "░")
 
         frames.append(g)
 
