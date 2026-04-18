@@ -1,0 +1,46 @@
+---
+// Coffee ring blot — an irregular ring of weak brown pigment.
+// Position + opacity are driven by CSS custom properties set inline
+// on the post-main element (--coffee-x, --coffee-y, --coffee-opacity),
+// themselves derived from the post slug's seed.
+//
+// Budget: single inline SVG, <10 path commands, <1KB of HTML.
+---
+
+<svg
+  class="coffee-ring"
+  viewBox="0 0 100 100"
+  aria-hidden="true"
+  focusable="false"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <filter id="cr-blur"><feGaussianBlur stdDeviation="0.8" /></filter>
+  </defs>
+  <g filter="url(#cr-blur)" fill="none" stroke="#6b4a2b">
+    <ellipse cx="50" cy="50" rx="38" ry="36" stroke-width="3.2" opacity="0.85" />
+    <ellipse cx="51" cy="51" rx="34" ry="32" stroke-width="1.4" opacity="0.55" />
+    <path d="M 16 42 Q 30 18 58 14" stroke-width="2.1" opacity="0.4" />
+    <path d="M 82 60 Q 78 86 54 90" stroke-width="1.6" opacity="0.35" />
+  </g>
+</svg>
+
+<style>
+  .coffee-ring {
+    position: absolute;
+    left: var(--coffee-x, 50%);
+    top: var(--coffee-y, 50%);
+    width: clamp(80px, 14vw, 140px);
+    height: clamp(80px, 14vw, 140px);
+    transform: translate(-50%, -50%);
+    opacity: var(--coffee-opacity, 0.06);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    z-index: 0;
+  }
+  /* CSS default: if data-variant-* is missing, the ring still renders at its
+     default 50/50 position and 0.06 opacity, so nothing breaks. */
+  @media (prefers-reduced-motion: reduce) {
+    .coffee-ring { opacity: calc(var(--coffee-opacity, 0.06) * 0.8); }
+  }
+</style>
