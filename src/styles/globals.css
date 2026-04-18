@@ -1,5 +1,58 @@
 @import 'tailwindcss';
 
-/* Base resets and non-theme design tokens live in tokens.css.
-   Per-category themes live in styles/themes/<category>.css. */
 @import './tokens.css';
+
+@import './themes/tech.css';
+@import './themes/personal.css';
+@import './themes/political.css';
+@import './themes/media.css';
+@import './themes/journal.css';
+
+/* Base reset + typography baseline */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--color-bg, #0a0a0b);
+  color: var(--color-fg, #e5e7eb);
+  font-family: var(--font-body, ui-sans-serif, system-ui, sans-serif);
+  line-height: var(--line-height-body);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display, var(--font-body));
+  line-height: var(--line-height-display);
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}

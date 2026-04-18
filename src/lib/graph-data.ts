@@ -1,4 +1,5 @@
-export type Category = 'tech' | 'personal' | 'political' | 'media' | 'journal';
+import type { Category } from './categories';
+export type { Category };
 
 export interface PostInput {
   title: string;

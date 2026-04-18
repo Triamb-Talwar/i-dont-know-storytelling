@@ -1,0 +1,28 @@
+---
+import type { Category } from '@lib/categories';
+import { CATEGORY_CONFIG } from '@lib/categories';
+
+interface Props {
+  title: string;
+  category: Category;
+  created: Date;
+  tags: string[];
+}
+
+const { title, category, created, tags } = Astro.props;
+const label = CATEGORY_CONFIG[category].label;
+const formatted = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+}).format(created);
+---
+
+<header class="post-header">
+  <h1 class="post-title">{title}</h1>
+  <div class="post-meta">
+    <span class="cat-tag">{label}</span>
+    <time datetime={created.toISOString()}>{formatted}</time>
+    {tags.length > 0 && <span class="tags">{tags.map((t) => `#${t}`).join(' ')}</span>}
+  </div>
+</header>

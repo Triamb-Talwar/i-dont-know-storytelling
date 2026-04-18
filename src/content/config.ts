@@ -1,12 +1,11 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-
-const categories = ['tech', 'personal', 'political', 'media', 'journal'] as const;
+import { CATEGORIES } from '../lib/categories';
 
 const postSchema = z.object({
   title: z.string(),
   slug: z.string().regex(/^[a-z0-9-]+$/),
-  category: z.enum(categories),
+  category: z.enum(CATEGORIES),
   visibility: z.enum(['public', 'private']).default('public'),
   created: z.date(),
   updated: z.date().optional(),
@@ -28,7 +27,6 @@ const postSchema = z.object({
     .optional(),
 });
 
-export type Category = (typeof categories)[number];
 export type Post = z.infer<typeof postSchema>;
 
 const posts = defineCollection({

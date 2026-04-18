@@ -1,11 +1,92 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import BaseLayout from '@layouts/BaseLayout.astro';
+import { CATEGORY_CONFIG } from '@lib/categories';
+
+const posts = await getCollection('posts', ({ data }) => data.visibility === 'public');
+posts.sort((a, b) => b.data.created.getTime() - a.data.created.getTime());
 ---
 
 <BaseLayout title="i don't know storytelling">
-  <main>
-    <h1>i don't know storytelling</h1>
-    <p>but i have stories to tell.</p>
-    <p><small>scaffold up. graph lands in phase 1.</small></p>
+  <main class="home">
+    <h1 class="home-title">i don't know storytelling</h1>
+    <p class="home-sub">but i have stories to tell.</p>
+    <p class="home-note">graph lands in phase 1.5. meanwhile, a list:</p>
+    <ul class="home-posts">
+      {
+        posts.map((p) => {
+          const cfg = CATEGORY_CONFIG[p.data.category];
+          return (
+            <li>
+              <a href={`/posts/${p.data.slug}`}>
+                <span class="cat" style={`color:${cfg.primary}`}>{cfg.label}</span>
+                <span class="t">{p.data.title}</span>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
   </main>
 </BaseLayout>
+
+<style>
+  .home {
+    min-height: 100dvh;
+    max-width: 680px;
+    margin-inline: auto;
+    padding: 10vh clamp(1rem, 5vw, 3rem);
+    color: #e5e7eb;
+    background: #0a0a0b;
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+  .home-title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-block-end: 0.2em;
+  }
+  .home-sub {
+    color: #8b93a1;
+    margin-block-end: 2rem;
+  }
+  .home-note {
+    color: #5a606b;
+    font-size: 0.85rem;
+    margin-block-end: 1.5rem;
+    padding-block-end: 1rem;
+    border-block-end: 1px dashed #2a2e36;
+  }
+  .home-posts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .home-posts a {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: 1.25rem;
+    padding: 0.9rem 1rem;
+    text-decoration: none;
+    color: #e5e7eb;
+    border: 1px solid #1f2329;
+    border-radius: 2px;
+    transition: border-color 150ms, background 150ms;
+  }
+  .home-posts a:hover {
+    border-color: #3a414b;
+    background: #101218;
+  }
+  .home-posts .cat {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    align-self: center;
+  }
+  .home-posts .t {
+    font-size: 1.05rem;
+    color: #e5e7eb;
+  }
+</style>

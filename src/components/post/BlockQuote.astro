@@ -1,0 +1,25 @@
+---
+interface Props {
+  cite?: string;
+  author?: string;
+}
+
+const { cite, author } = Astro.props;
+---
+
+<blockquote cite={cite}>
+  <slot />
+  {author && <footer class="quote-author">— {author}</footer>}
+</blockquote>
+
+<style>
+  .quote-author {
+    display: block;
+    margin-block-start: 0.8em;
+    font-size: 0.85em;
+    color: var(--color-muted);
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+</style>

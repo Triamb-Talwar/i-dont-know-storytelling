@@ -1,0 +1,20 @@
+---
+import type { Category } from '@lib/categories';
+import PostHeader from './PostHeader.astro';
+
+interface Props {
+  title: string;
+  category: Category;
+  created: Date;
+  tags: string[];
+}
+
+const { title, category, created, tags } = Astro.props;
+---
+
+<article class="post-main">
+  <PostHeader title={title} category={category} created={created} tags={tags} />
+  <div class="post-body">
+    <slot />
+  </div>
+</article>

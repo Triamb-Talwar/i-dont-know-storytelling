@@ -1,10 +1,21 @@
 ---
+import type { Category } from '@lib/categories';
+import { googleFontsHref } from '@lib/categories';
+import '@styles/globals.css';
+
 interface Props {
   title?: string;
-  theme?: 'tech' | 'personal' | 'political' | 'media' | 'journal';
+  description?: string;
+  theme?: Category;
 }
 
-const { title = "i don't know storytelling", theme } = Astro.props;
+const {
+  title = "i don't know storytelling",
+  description = 'a personal blog as an interconnected graph.',
+  theme,
+} = Astro.props;
+
+const fontsHref = theme ? googleFontsHref(theme) : null;
 ---
 
 <!doctype html>
@@ -13,14 +24,15 @@ const { title = "i don't know storytelling", theme } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    {fontsHref && <link rel="stylesheet" href={fontsHref} />}
   </head>
   <body>
     <slot />
   </body>
 </html>
-
-<style is:global>
-  @import '../styles/globals.css';
-</style>
