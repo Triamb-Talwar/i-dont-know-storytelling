@@ -24,7 +24,7 @@ that's it. there's no plan step. there's no tool-selection layer. there's no "le
 
 <AsciiCanvas client:visible name="missile" label="missile arcing and exploding — metaphor for retry-until-it-works" />
 
-### why this keeps working
+## why this keeps working
 
 people want to give every agent a planner. every agent gets rag. every agent gets a finite-state-machine scaffold and four layers of tool-calling orchestration. and in most domains that's correct — the search space is too large, the failure modes are too expensive, you can't brute-force your way out.
 
@@ -32,13 +32,13 @@ but the sql domain has a property that makes brute-force cheap: **every failure 
 
 i wrote about the same pattern in a sibling agent i'm building, which i named mimir, which is named after [the god of war character](./god-of-war-ragnarok) because i was re-playing ragnarok the week i started the project and the head-in-a-bag felt appropriate for a "knows everything but is attached to someone else" agent.
 
-### the openclaw trick
+## the openclaw trick
 
 the one non-trivial piece is how jonah captures db errors without giving itself arbitrary execution privileges. the naive version pipes the query straight to psql and eats whatever comes back. the safer version — which is what i actually shipped — wraps the query in a transaction, runs it, captures the error from a read-only connection, and rolls back. openclaw (internal name, it's just a 40-line wrapper around pg) does this with one function.
 
 openclaw also happens to be where this whole direction started. i built it because i was tired of my sql scripts half-committing when i typo'd a column name. once i had a safe-execute primitive, letting an agent loop on it was a two-hour job.
 
-### what jonah is not
+## what jonah is not
 
 jonah is not a general sql agent. jonah will hallucinate table names that sound reasonable. jonah will write `SELECT *` when it shouldn't. jonah has no memory between sessions. if you asked jonah to do analytics on a warehouse with 800 tables, jonah would fail cheerfully and tell you everything ran great.
 

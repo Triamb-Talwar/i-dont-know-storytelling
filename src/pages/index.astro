@@ -33,11 +33,11 @@ const byCategory = CATEGORIES.map((c) => ({
         byCategory.map((cat) =>
           cat.posts.length === 0 ? null : (
             <section>
-              <h3 style={`color:${CATEGORY_CONFIG[cat.id].primary}`}>{cat.label}</h3>
+              <h3 data-cat={cat.id}>{cat.label}</h3>
               <ul>
                 {cat.posts.map((p) => (
                   <li>
-                    <a href={`/posts/${p.data.slug}`}>{p.data.title}</a>
+                    <a href={`/posts/${p.data.slug}/`}>{p.data.title}</a>
                   </li>
                 ))}
               </ul>
@@ -175,6 +175,12 @@ const byCategory = CATEGORIES.map((c) => ({
       margin: 0 0 0.75rem;
       font-weight: 500;
     }
+    /* Category-tinted labels on the dark home bg — all meet WCAG AA ≥4.5 */
+    .parallel-nav h3[data-cat='tech']      { color: #63e99b; }
+    .parallel-nav h3[data-cat='personal']  { color: #e58a6b; }
+    .parallel-nav h3[data-cat='political'] { color: #d96161; }
+    .parallel-nav h3[data-cat='media']     { color: #8de6f3; }
+    .parallel-nav h3[data-cat='journal']   { color: #d4c8b0; }
     .parallel-nav ul {
       list-style: none;
       padding: 0;
