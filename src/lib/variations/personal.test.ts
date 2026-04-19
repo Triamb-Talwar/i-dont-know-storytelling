@@ -27,8 +27,8 @@ describe('pickPersonalVariants', () => {
       expect(v.inkBlotY).toBeLessThanOrEqual(80);
       expect(v.inkBlotRot).toBeGreaterThanOrEqual(0);
       expect(v.inkBlotRot).toBeLessThanOrEqual(359);
-      expect(v.inkBlotOpacity).toBeGreaterThanOrEqual(0.1);
-      expect(v.inkBlotOpacity).toBeLessThanOrEqual(0.22);
+      expect(v.inkBlotOpacity).toBeGreaterThanOrEqual(0.22);
+      expect(v.inkBlotOpacity).toBeLessThanOrEqual(0.38);
       expect(Math.abs(v.marginaliaRot)).toBeGreaterThanOrEqual(2);
       expect(Math.abs(v.marginaliaRot)).toBeLessThanOrEqual(8);
       expect(v.underlineRoughness).toBeGreaterThanOrEqual(0.5);

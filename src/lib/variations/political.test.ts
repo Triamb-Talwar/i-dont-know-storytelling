@@ -28,8 +28,8 @@ describe('pickPoliticalVariants', () => {
       expect(v.issueMasthead).toMatch(/Vol\./);
       expect(Math.abs(v.stampRot)).toBeGreaterThanOrEqual(3);
       expect(Math.abs(v.stampRot)).toBeLessThanOrEqual(15);
-      expect(v.stampOpacity).toBeGreaterThanOrEqual(0.08);
-      expect(v.stampOpacity).toBeLessThanOrEqual(0.15);
+      expect(v.stampOpacity).toBeGreaterThanOrEqual(0.28);
+      expect(v.stampOpacity).toBeLessThanOrEqual(0.42);
     }
   });
 

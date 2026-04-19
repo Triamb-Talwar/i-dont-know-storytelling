@@ -161,7 +161,7 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.045;
+  opacity: 0.14;
   background: repeating-linear-gradient(
     135deg,
     var(--color-primary) 0 1px,
@@ -177,12 +177,13 @@
 [data-theme='tech'] .post-main::before {
   position: absolute;
   font-family: var(--font-code);
-  font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  color: color-mix(in oklab, var(--color-muted) 70%, transparent);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  color: color-mix(in oklab, var(--color-primary) 85%, transparent);
   pointer-events: none;
-  padding: 0.2em 0.4em;
-  border: 1px solid color-mix(in oklab, var(--color-muted) 35%, transparent);
+  padding: 0.3em 0.6em;
+  border: 1px solid color-mix(in oklab, var(--color-primary) 55%, transparent);
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
   border-radius: 2px;
   z-index: 1;
 }
@@ -196,5 +197,5 @@
 [data-theme='tech'] .post-main[data-variant-watermarkCorner='br']::before { bottom: 0.8rem; right: 0.8rem; }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-theme='tech'] .post-main::after { opacity: 0.025; }
+  [data-theme='tech'] .post-main::after { opacity: 0.08; }
 }

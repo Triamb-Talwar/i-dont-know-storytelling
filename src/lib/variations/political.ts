@@ -9,7 +9,7 @@ export interface PoliticalVariants {
   issueMasthead: string;
   /** Rotation of the weathered stamp (degrees, 3–15). */
   stampRot: number;
-  /** Opacity of the weathered stamp (0.08–0.15). */
+  /** Opacity of the weathered stamp (0.28–0.42). */
   stampOpacity: number;
 }
 
@@ -25,6 +25,6 @@ export function pickPoliticalVariants(seed: number, created?: Date): PoliticalVa
     columnRule: pick(rng, ['solid', 'dotted', 'double'] as const),
     issueMasthead: `Vol.\u00A0${vol}\u00A0\u00B7\u00A0Issue\u00A0\u2116${issueNum}`,
     stampRot: sign * pickInt(rng, 3, 15),
-    stampOpacity: Math.round((0.08 + rng() * 0.07) * 100) / 100,
+    stampOpacity: Math.round((0.28 + rng() * 0.14) * 100) / 100,
   };
 }
