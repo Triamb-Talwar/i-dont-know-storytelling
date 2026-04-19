@@ -406,7 +406,7 @@ export default function Graph() {
       if (from && from.id !== node.id) addBreadcrumb(from.id, node.id);
     }
 
-    const href = `/posts/${node.id}`;
+    const href = `/posts/${node.id}/`;
     const vt = (document as Document & {
       startViewTransition?: (cb: () => void) => { finished: Promise<void> };
     }).startViewTransition;

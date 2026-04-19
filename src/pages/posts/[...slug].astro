@@ -133,7 +133,7 @@ for (const p of allPosts) {
       const from = nodes.find((n) => n.slug === fromSlug);
       const to = nodes.find((n) => n.slug === toSlug);
       if (!from || !to) {
-        window.location.href = `/posts/${toSlug}`;
+        window.location.href = `/posts/${toSlug}/`;
         return;
       }
 
@@ -261,7 +261,7 @@ for (const p of allPosts) {
       if (slug === currentSlug) return;
 
       e.preventDefault();
-      const dest = `/posts/${slug}`;
+      const dest = `/posts/${slug}/`;
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // Save origin so destination can render arriving rivers overlay.

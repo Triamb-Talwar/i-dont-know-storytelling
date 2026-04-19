@@ -7,7 +7,9 @@ import netlify from '@astrojs/netlify';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://i-dont-know-storytelling.local',
+  site: 'https://idkstorytellingbutihavestoriestotell.netlify.app',
+  // Match Netlify's pretty-URL behavior so internal links skip the 301 hop.
+  trailingSlash: 'always',
   integrations: [react(), mdx(), keystatic()],
   adapter: netlify(),
   vite: {
