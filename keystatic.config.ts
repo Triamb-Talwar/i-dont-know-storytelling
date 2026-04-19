@@ -1,4 +1,5 @@
 import { config, fields, collection } from '@keystatic/core';
+import { inline } from '@keystatic/core/content-components';
 
 const isProd = import.meta.env.PROD;
 
@@ -56,6 +57,25 @@ export default config({
         ),
         content: fields.mdx({
           label: 'Content',
+          components: {
+            // Inline @-mention: picks any post from the collection, renders a
+            // category-themed link in the prose. The MDX output looks like
+            // `<Node slug="some-slug" label="text" />` — see
+            // src/components/post/Node.astro for the render side.
+            Node: inline({
+              label: 'Node link',
+              schema: {
+                slug: fields.relationship({
+                  label: 'Target post',
+                  collection: 'posts',
+                  validation: { isRequired: true },
+                }),
+                label: fields.text({
+                  label: 'Display text (optional — defaults to target title)',
+                }),
+              },
+            }),
+          },
         }),
       },
     }),

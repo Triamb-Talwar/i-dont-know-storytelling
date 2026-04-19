@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import type { Category } from '@lib/categories';
+
+interface Props {
+  slug: string;
+  label?: string;
+}
+
+const { slug, label } = Astro.props;
+
+// Look up target post so we can theme the link by its category and
+// auto-fill the display text when the author didn't set one.
+const posts = await getCollection('posts');
+const target = posts.find((p) => p.data.slug === slug);
+
+const cat: Category | undefined = target?.data.category;
+const text = label ?? target?.data.title ?? slug;
+const href = `/posts/${slug}/`;
+---
+
+{
+  target && target.data.visibility === 'public' ? (
+    <a class="node-link" href={href} data-node-cat={cat}>
+      {text}
+    </a>
+  ) : (
+    // Private/missing target: render plain text, no broken link.
+    <span class="node-link node-link--missing">{text}</span>
+  )
+}
+
+<style>
+  .node-link {
+    --node-color: var(--color-primary, currentColor);
+    color: var(--node-color);
+    text-decoration: none;
+    background-image: linear-gradient(var(--node-color), var(--node-color));
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    padding-block-end: 1px;
+    transition:
+      background-size 0.25s ease,
+      color 0.2s ease;
+  }
+  .node-link::before {
+    content: '@';
+    opacity: 0.55;
+    margin-inline-end: 1px;
+    font-feature-settings: 'tnum';
+  }
+  .node-link:hover,
+  .node-link:focus-visible {
+    background-size: 100% 2px;
+    outline: none;
+  }
+  .node-link[data-node-cat='tech']      { --node-color: #63e99b; }
+  .node-link[data-node-cat='personal']  { --node-color: #c0522f; }
+  .node-link[data-node-cat='political'] { --node-color: #8b1a1a; }
+  .node-link[data-node-cat='media']     { --node-color: #3ab4c4; }
+  .node-link[data-node-cat='journal']   { --node-color: #6b6250; }
+
+  .node-link--missing {
+    color: inherit;
+    text-decoration: line-through;
+    opacity: 0.5;
+    cursor: help;
+  }
+  .node-link--missing::before {
+    content: '@';
+    opacity: 0.35;
+  }
+</style>

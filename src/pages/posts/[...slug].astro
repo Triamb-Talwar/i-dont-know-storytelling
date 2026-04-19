@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PostView from '@components/post/PostView.astro';
+import Node from '@components/post/Node.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.visibility === 'public');
@@ -24,7 +25,7 @@ for (const p of allPosts) {
 
 <BaseLayout title={`${title} · i don't know storytelling`} theme={category}>
   <PostView title={title} category={category} created={created} tags={tags} slug={slug}>
-    <Content />
+    <Content components={{ Node }} />
   </PostView>
 
   <script
