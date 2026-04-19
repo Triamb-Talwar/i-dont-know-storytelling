@@ -148,3 +148,47 @@
   font-size: 0.5em;
   margin-block: 1em;
 }
+
+/* ==========================================================================
+   Per-post seeded variations (personal)
+   ========================================================================== */
+
+[data-theme='personal'] .post-main { position: relative; }
+
+/* Drop-cap font bank — swaps the first-of-type ::first-letter font-family
+   by data-variant-dropCapFont. Falls back to the theme's display font. */
+[data-theme='personal'][data-variant-dropCapFont='playfair'] .post-body > p:first-of-type::first-letter {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+[data-theme='personal'][data-variant-dropCapFont='cormorant'] .post-body > p:first-of-type::first-letter {
+  font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+  font-style: italic;
+}
+[data-theme='personal'][data-variant-dropCapFont='bodoni'] .post-body > p:first-of-type::first-letter {
+  font-family: 'Bodoni Moda', 'Didot', Georgia, serif;
+  font-weight: 900;
+}
+
+/* Marginalia rotation — blockquotes tilt slightly off-grid by a seeded angle
+   so each personal post reads as a different sketchbook page. */
+[data-theme='personal'] .post-body blockquote {
+  transform: rotate(var(--marginalia-rot, 0deg));
+  transform-origin: center;
+  transition: transform 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+[data-theme='personal'] .post-body blockquote:hover {
+  transform: rotate(0deg);
+}
+
+/* Rough.js underline lives inside each <a> as an absolutely positioned SVG.
+   We just need to make sure the anchor has a positioning context and that
+   the native underline doesn't compete with the sketched one. */
+[data-theme='personal'] .post-body a {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme='personal'] .post-body blockquote {
+    transform: none;
+  }
+}

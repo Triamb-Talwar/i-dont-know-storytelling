@@ -28,7 +28,8 @@
     "d3-force": "^3.0.0",
     "motion": "^12.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "roughjs": "^4.6.6"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

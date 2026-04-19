@@ -3,7 +3,11 @@ import type { Category } from '@lib/categories';
 import PostHeader from './PostHeader.astro';
 import PostMinimap from './PostMinimap';
 import { getVariants, variantsToDataAttrs, type JournalVariants } from '@lib/variations';
+import type { PersonalVariants } from '@lib/variations/personal';
+import { hashSlug } from '@lib/seed';
 import CoffeeRing from './variants/CoffeeRing.astro';
+import InkBlot from './variants/InkBlot.astro';
+import RoughUnderlines from './variants/RoughUnderlines';
 
 interface Props {
   title: string;
@@ -17,23 +21,37 @@ const { title, category, created, tags, slug } = Astro.props;
 
 const variants = getVariants(category, slug, created);
 const dataAttrs = variantsToDataAttrs(variants);
+const slugSeed = hashSlug(slug);
 
-// Per-category inline CSS custom properties. Journal variants expose coffee-ring
-// position + opacity so the pseudo-element can be themed without extra selectors.
+// Per-category inline CSS custom properties. Journal + personal need inline
+// vars so pseudo-elements can be themed without an explosion of selectors.
 let inlineStyle = '';
 if (category === 'journal') {
   const j = variants as JournalVariants;
   inlineStyle = `--coffee-x:${j.coffeeRingX}%;--coffee-y:${j.coffeeRingY}%;--coffee-opacity:${j.coffeeRingOpacity};`;
+} else if (category === 'personal') {
+  const p = variants as PersonalVariants;
+  inlineStyle =
+    `--ink-x:${p.inkBlotX}%;--ink-y:${p.inkBlotY}%;--ink-rot:${p.inkBlotRot}deg;` +
+    `--ink-opacity:${p.inkBlotOpacity};--marginalia-rot:${p.marginaliaRot}deg;`;
 }
 ---
 
 <article class="post-main" id="main-content" {...dataAttrs} style={inlineStyle}>
   <div class="post-hero" aria-hidden="true"></div>
   {category === 'journal' && <CoffeeRing />}
+  {category === 'personal' && <InkBlot />}
   <PostHeader title={title} category={category} created={created} tags={tags} />
   <div class="post-body">
     <slot />
   </div>
+  {category === 'personal' && (
+    <RoughUnderlines
+      client:visible
+      roughness={(variants as PersonalVariants).underlineRoughness}
+      seed={slugSeed}
+    />
+  )}
   <PostMinimap currentSlug={slug} client:visible />
 </article>
 
