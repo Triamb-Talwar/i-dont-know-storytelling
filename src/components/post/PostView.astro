@@ -4,6 +4,7 @@ import PostHeader from './PostHeader.astro';
 import PostMinimap from './PostMinimap';
 import { getVariants, variantsToDataAttrs, type JournalVariants } from '@lib/variations';
 import type { PersonalVariants } from '@lib/variations/personal';
+import type { PoliticalVariants } from '@lib/variations/political';
 import { hashSlug } from '@lib/seed';
 import CoffeeRing from './variants/CoffeeRing.astro';
 import InkBlot from './variants/InkBlot.astro';
@@ -34,6 +35,9 @@ if (category === 'journal') {
   inlineStyle =
     `--ink-x:${p.inkBlotX}%;--ink-y:${p.inkBlotY}%;--ink-rot:${p.inkBlotRot}deg;` +
     `--ink-opacity:${p.inkBlotOpacity};--marginalia-rot:${p.marginaliaRot}deg;`;
+} else if (category === 'political') {
+  const pol = variants as PoliticalVariants;
+  inlineStyle = `--stamp-rot:${pol.stampRot}deg;--stamp-opacity:${pol.stampOpacity};`;
 }
 ---
 

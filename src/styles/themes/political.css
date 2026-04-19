@@ -129,3 +129,50 @@
   margin-block: 1.5em;
   column-span: all;
 }
+
+/* ==========================================================================
+   Per-post seeded variations (political)
+   ========================================================================== */
+
+[data-theme='political'] .post-main { position: relative; }
+
+/* Section ornament — replaces the hr text content per variant. */
+[data-theme='political'] .post-body hr {
+  border: none;
+  text-align: center;
+  margin-block: 2rem;
+  color: var(--color-muted);
+  column-span: all;
+}
+[data-theme='political'][data-variant-sectionOrnament='\2726'] .post-body hr::before { content: '\2726'; }
+[data-theme='political'][data-variant-sectionOrnament='\2766'] .post-body hr::before { content: '\2766'; }
+[data-theme='political'][data-variant-sectionOrnament='\A7']   .post-body hr::before { content: '\A7\A0\A7\A0\A7'; }
+[data-theme='political'][data-variant-sectionOrnament='\B6']   .post-body hr::before { content: '\B6'; }
+[data-theme='political'][data-variant-sectionOrnament='\2767'] .post-body hr::before { content: '\2767'; }
+[data-theme='political'][data-variant-sectionOrnament='\2756'] .post-body hr::before { content: '\2756'; }
+[data-theme='political'][data-variant-sectionOrnament='\2727'] .post-body hr::before { content: '\2727\2009\2727'; }
+
+/* Column-rule style variants. */
+[data-theme='political'][data-variant-columnRule='solid']  .post-body { column-rule-style: solid; }
+[data-theme='political'][data-variant-columnRule='dotted'] .post-body { column-rule-style: dotted; }
+[data-theme='political'][data-variant-columnRule='double'] .post-body { column-rule-style: double; column-rule-width: 3px; }
+
+/* Weathered stamp — the issue masthead drawn as a rotated label in a corner.
+   content: attr() reads data-variant-issueMasthead off the same element. */
+[data-theme='political'] .post-main::before {
+  content: attr(data-variant-issueMasthead);
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  font-variant-caps: all-small-caps;
+  color: var(--color-primary);
+  opacity: var(--stamp-opacity, 0.1);
+  transform: rotate(var(--stamp-rot, -5deg));
+  transform-origin: center;
+  padding: 0.25em 0.55em;
+  border: 1px solid var(--color-primary);
+  pointer-events: none;
+}
