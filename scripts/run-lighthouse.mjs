@@ -20,7 +20,7 @@ if (!url) {
 const postArg = process.argv.find((a) => a.startsWith('--post-slug='));
 const postSlug = postArg ? postArg.split('=')[1] : 'jonah-brute-force-sql';
 
-const targets = [url, `${url.replace(/\/$/, '')}/posts/${postSlug}`];
+const targets = [url, `${url.replace(/\/$/, '')}/posts/${postSlug}/`];
 
 const res = spawnSync(
   'npx',

@@ -32,6 +32,8 @@
     "roughjs": "^4.6.6"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@astrojs/node": "^9.5.5",
     "@tailwindcss/vite": "^4.0.0",
     "@types/d3-force": "^3.0.10",
     "@types/react": "^19.0.0",

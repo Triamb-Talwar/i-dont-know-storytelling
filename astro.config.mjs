@@ -4,6 +4,9 @@ import mdx from '@astrojs/mdx';
 import tailwindcss from '@tailwindcss/vite';
 import keystatic from '@keystatic/astro';
 import netlify from '@astrojs/netlify';
+import node from '@astrojs/node';
+
+const isNetlifyBuild = process.env.NETLIFY === 'true';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,7 +17,19 @@ export default defineConfig({
   // use /posts/<slug>/ and Netlify's pretty-URL behavior keeps them clean.
   trailingSlash: 'ignore',
   integrations: [react(), mdx(), keystatic()],
-  adapter: netlify(),
+  // Local Windows builds can fail during Netlify function bundling because of
+  // symlink permissions. We only enable the Netlify adapter inside Netlify CI.
+  ...(isNetlifyBuild
+    ? {
+        output: 'server',
+        adapter: netlify(),
+      }
+    : {
+        // Local builds use the Node adapter so Windows dev environments don't
+        // depend on Netlify's symlink-heavy function bundling.
+        output: 'server',
+        adapter: node({ mode: 'standalone' }),
+      }),
   vite: {
     plugins: [tailwindcss()],
   },

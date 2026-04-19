@@ -26,7 +26,7 @@ const formatted = new Intl.DateTimeFormat('en-GB', {
     {tags.length > 0 && (
       <span class="tags">
         {tags.map((t) => (
-          <a href={`/?tag=${t}`} class="tag-link" data-tag={t}>#{t}</a>
+          <a href={`/?tag=${encodeURIComponent(t)}`} class="tag-link" data-tag={t}>#{t}</a>
         ))}
       </span>
     )}

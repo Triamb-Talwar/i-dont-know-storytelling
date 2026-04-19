@@ -23,6 +23,7 @@ export const GET: APIRoute = async () => {
   for (const n of graph.nodes) {
     if (n.visibility === 'private') remap.set(n.id, `private-${hash(n.id)}`);
   }
+  const privateIds = new Set(remap.keys());
 
   graph.nodes = graph.nodes.map((n) =>
     n.visibility === 'private'
@@ -30,11 +31,13 @@ export const GET: APIRoute = async () => {
       : n,
   );
   graph.edges = graph.edges
+    // Keep teaser dots private: do not leak private topology through edges.
+    .filter((e) => !privateIds.has(e.source) && !privateIds.has(e.target))
     .map((e) => ({
       ...e,
       source: remap.get(e.source) ?? e.source,
       target: remap.get(e.target) ?? e.target,
-      reason: remap.has(e.source) || remap.has(e.target) ? undefined : e.reason,
+      reason: e.reason,
     }))
     .filter((e) => e.source !== e.target);
 
