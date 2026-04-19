@@ -7,7 +7,7 @@ export const GET: APIRoute = async () => {
 
   const posts: PostInput[] = entries.map((e) => ({
     title: e.data.title,
-    slug: e.data.slug,
+    slug: e.data.slug ?? e.id,
     category: e.data.category,
     visibility: e.data.visibility,
     created: e.data.created,

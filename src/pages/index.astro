@@ -37,7 +37,7 @@ const byCategory = CATEGORIES.map((c) => ({
               <ul>
                 {cat.posts.map((p) => (
                   <li>
-                    <a href={`/posts/${p.data.slug}/`}>{p.data.title}</a>
+                    <a href={`/posts/${p.data.slug ?? p.id}/`}>{p.data.title}</a>
                   </li>
                 ))}
               </ul>

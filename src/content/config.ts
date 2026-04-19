@@ -4,7 +4,12 @@ import { CATEGORIES } from '../lib/categories';
 
 const postSchema = z.object({
   title: z.string(),
-  slug: z.string().regex(/^[a-z0-9-]+$/),
+  // Keystatic derives the slug from the filename and doesn't re-serialize it
+  // into frontmatter. Optional here, with callers falling back to `entry.id`.
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/)
+    .optional(),
   category: z.enum(CATEGORIES),
   visibility: z.enum(['public', 'private']).default('public'),
   created: z.date(),

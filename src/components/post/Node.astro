@@ -12,7 +12,7 @@ const { slug, label } = Astro.props;
 // Look up target post so we can theme the link by its category and
 // auto-fill the display text when the author didn't set one.
 const posts = await getCollection('posts');
-const target = posts.find((p) => p.data.slug === slug);
+const target = posts.find((p) => (p.data.slug ?? p.id) === slug);
 
 const cat: Category | undefined = target?.data.category;
 const text = label ?? target?.data.title ?? slug;

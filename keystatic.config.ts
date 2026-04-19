@@ -1,5 +1,5 @@
 import { config, fields, collection } from '@keystatic/core';
-import { inline } from '@keystatic/core/content-components';
+import { block, inline } from '@keystatic/core/content-components';
 
 const isProd = import.meta.env.PROD;
 
@@ -46,7 +46,11 @@ export default config({
         }),
         links: fields.array(
           fields.object({
-            slug: fields.text({ label: 'Target slug' }),
+            slug: fields.relationship({
+              label: 'Target post',
+              collection: 'posts',
+              validation: { isRequired: true },
+            }),
             reason: fields.text({ label: 'Reason for link' }),
             strength: fields.number({ label: 'Strength', defaultValue: 0.5 }),
           }),
@@ -62,6 +66,31 @@ export default config({
             // category-themed link in the prose. The MDX output looks like
             // `<Node slug="some-slug" label="text" />` — see
             // src/components/post/Node.astro for the render side.
+            AsciiCanvas: block({
+              label: 'ASCII canvas',
+              schema: {
+                name: fields.text({
+                  label: 'Asset name',
+                  description:
+                    'Filename in /public/ascii/ without extension. e.g. "missile" → /public/ascii/missile.json',
+                  validation: { isRequired: true },
+                }),
+                label: fields.text({ label: 'Accessible label (optional)' }),
+                size: fields.number({
+                  label: 'Font size (rem)',
+                  defaultValue: 0.75,
+                }),
+                align: fields.select({
+                  label: 'Align',
+                  options: [
+                    { label: 'Left', value: 'left' },
+                    { label: 'Center', value: 'center' },
+                    { label: 'Right', value: 'right' },
+                  ],
+                  defaultValue: 'center',
+                }),
+              },
+            }),
             Node: inline({
               label: 'Node link',
               schema: {

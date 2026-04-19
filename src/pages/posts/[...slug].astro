@@ -3,29 +3,31 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '@layouts/BaseLayout.astro';
 import PostView from '@components/post/PostView.astro';
 import Node from '@components/post/Node.astro';
+import AsciiCanvas from '@components/post/AsciiCanvasIsland.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => data.visibility === 'public');
   return posts.map((post) => ({
-    params: { slug: post.data.slug },
+    params: { slug: post.data.slug ?? post.id },
     props: { post },
   }));
 }
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-const { title, category, created, tags, slug } = post.data;
+const { title, category, created, tags } = post.data;
+const slug = post.data.slug ?? post.id;
 
 const allPosts = await getCollection('posts', ({ data }) => data.visibility === 'public');
 const slugCategoryMap: Record<string, string> = {};
 for (const p of allPosts) {
-  slugCategoryMap[p.data.slug] = p.data.category;
+  slugCategoryMap[p.data.slug ?? p.id] = p.data.category;
 }
 ---
 
 <BaseLayout title={`${title} · i don't know storytelling`} theme={category}>
   <PostView title={title} category={category} created={created} tags={tags} slug={slug}>
-    <Content components={{ Node }} />
+    <Content components={{ Node, AsciiCanvas }} />
   </PostView>
 
   <script

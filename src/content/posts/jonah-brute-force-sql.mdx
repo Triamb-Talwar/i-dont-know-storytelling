@@ -14,15 +14,13 @@ links:
     strength: 0.4
 ---
 
-import AsciiCanvas from '@components/post/AsciiCanvas';
-
 jonah doesn't know sql. jonah isn't supposed to know sql. jonah is an agent i wrote on a thursday afternoon when i was tired of hand-writing joins for a csv import script i only needed to run twice.
 
 the premise is dumb on purpose. you give jonah a natural-language question and a schema dump. jonah writes a query. jonah runs the query. if it errors, jonah reads the error and writes a new query. jonah keeps going until either the query runs or jonah's budget of 20 tries is up.
 
 that's it. there's no plan step. there's no tool-selection layer. there's no "let me think about this". jonah is brute-force with a language model taped to it. and in the domain it lives in — a single-user dashboard over a known schema — that's completely fine.
 
-<AsciiCanvas client:visible name="missile" label="missile arcing and exploding — metaphor for retry-until-it-works" />
+<AsciiCanvas name="missile" label="missile arcing and exploding — metaphor for retry-until-it-works" />
 
 ## why this keeps working
 
@@ -44,5 +42,5 @@ jonah is not a general sql agent. jonah will hallucinate table names that sound 
 
 but on a 12-table dashboard with a thousand-row schema dump, jonah is fine. and [i didn't need more than fine](./sunday-notes).
 
-<AsciiCanvas client:visible name="rain" size={0.8} label="rain falling — the retry loop" />
+<AsciiCanvas name="rain" size={0.8} label="rain falling — the retry loop" />
 

@@ -1,0 +1,18 @@
+---
+// Thin wrapper so MDX can write <AsciiCanvas name="..." /> and still get
+// client-side hydration when Astro renders the page. Keystatic's editor
+// doesn't understand Astro's `client:*` directives in MDX, so we keep the
+// client directive here in the Astro layer instead of the MDX source.
+import AsciiCanvas from './AsciiCanvas';
+
+interface Props {
+  name: string;
+  label?: string;
+  size?: number;
+  align?: 'left' | 'center' | 'right';
+}
+
+const props = Astro.props as Props;
+---
+
+<AsciiCanvas client:visible {...props} />
