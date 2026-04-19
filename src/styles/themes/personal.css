@@ -157,14 +157,14 @@
 
 /* Drop-cap font bank — swaps the first-of-type ::first-letter font-family
    by data-variant-dropCapFont. Falls back to the theme's display font. */
-[data-theme='personal'][data-variant-dropCapFont='playfair'] .post-body > p:first-of-type::first-letter {
+[data-theme='personal'] .post-main[data-variant-dropCapFont='playfair'] .post-body > p:first-of-type::first-letter {
   font-family: 'Playfair Display', Georgia, serif;
 }
-[data-theme='personal'][data-variant-dropCapFont='cormorant'] .post-body > p:first-of-type::first-letter {
+[data-theme='personal'] .post-main[data-variant-dropCapFont='cormorant'] .post-body > p:first-of-type::first-letter {
   font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
   font-style: italic;
 }
-[data-theme='personal'][data-variant-dropCapFont='bodoni'] .post-body > p:first-of-type::first-letter {
+[data-theme='personal'] .post-main[data-variant-dropCapFont='bodoni'] .post-body > p:first-of-type::first-letter {
   font-family: 'Bodoni Moda', 'Didot', Georgia, serif;
   font-weight: 900;
 }

@@ -167,21 +167,21 @@
   bottom: -1px;
   clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
-[data-theme='journal'][data-variant-cornerFold='tl'] .post-main::before {
+[data-theme='journal'] .post-main[data-variant-cornerFold='tl']::before {
   top: -1px; left: -1px; right: auto; bottom: auto;
   clip-path: polygon(0 0, 100% 0, 0 100%);
   background:
     linear-gradient(-45deg, transparent 48%, color-mix(in oklab, var(--color-fg) 8%, transparent) 52%, transparent 70%),
     var(--color-bg);
 }
-[data-theme='journal'][data-variant-cornerFold='tr'] .post-main::before {
+[data-theme='journal'] .post-main[data-variant-cornerFold='tr']::before {
   top: -1px; right: -1px; left: auto; bottom: auto;
   clip-path: polygon(0 0, 100% 0, 100% 100%);
   background:
     linear-gradient(45deg, transparent 48%, color-mix(in oklab, var(--color-fg) 8%, transparent) 52%, transparent 70%),
     var(--color-bg);
 }
-[data-theme='journal'][data-variant-cornerFold='bl'] .post-main::before {
+[data-theme='journal'] .post-main[data-variant-cornerFold='bl']::before {
   bottom: -1px; left: -1px; top: auto; right: auto;
   clip-path: polygon(0 0, 100% 100%, 0 100%);
   background:
@@ -190,18 +190,18 @@
 }
 
 /* Date stamp styles — three subtle presentations of the post's time element. */
-[data-theme='journal'][data-variant-dateStamp='stamp-a'] .post-meta time {
+[data-theme='journal'] .post-main[data-variant-dateStamp='stamp-a'] .post-meta time {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.06em;
 }
-[data-theme='journal'][data-variant-dateStamp='stamp-b'] .post-meta time {
+[data-theme='journal'] .post-main[data-variant-dateStamp='stamp-b'] .post-meta time {
   font-variant-numeric: tabular-nums;
   padding: 0.1em 0.5em;
   border: 1px dashed var(--color-rule);
   border-radius: 2px;
   letter-spacing: 0.04em;
 }
-[data-theme='journal'][data-variant-dateStamp='stamp-c'] .post-meta time {
+[data-theme='journal'] .post-main[data-variant-dateStamp='stamp-c'] .post-meta time {
   font-variant-numeric: tabular-nums;
   text-decoration: underline;
   text-decoration-style: dotted;
@@ -209,12 +209,10 @@
   text-underline-offset: 3px;
 }
 
-/* Margin-note side — flips the coffee ring to the opposite edge if on the
-   'left' variant. When the ring's x is user-set it still wins; this only
-   biases default position when the ring uses the fallback 50/50. */
-[data-theme='journal'][data-variant-marginNote='left'] .coffee-ring {
+/* Margin-note side — flips the coffee ring saturation if on the 'left' variant. */
+[data-theme='journal'] .post-main[data-variant-marginNote='left'] .coffee-ring {
   filter: saturate(0.9);
 }
-[data-theme='journal'][data-variant-marginNote='right'] .coffee-ring {
+[data-theme='journal'] .post-main[data-variant-marginNote='right'] .coffee-ring {
   filter: saturate(1.05);
 }

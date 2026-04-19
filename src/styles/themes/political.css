@@ -144,18 +144,18 @@
   color: var(--color-muted);
   column-span: all;
 }
-[data-theme='political'][data-variant-sectionOrnament='\2726'] .post-body hr::before { content: '\2726'; }
-[data-theme='political'][data-variant-sectionOrnament='\2766'] .post-body hr::before { content: '\2766'; }
-[data-theme='political'][data-variant-sectionOrnament='\A7']   .post-body hr::before { content: '\A7\A0\A7\A0\A7'; }
-[data-theme='political'][data-variant-sectionOrnament='\B6']   .post-body hr::before { content: '\B6'; }
-[data-theme='political'][data-variant-sectionOrnament='\2767'] .post-body hr::before { content: '\2767'; }
-[data-theme='political'][data-variant-sectionOrnament='\2756'] .post-body hr::before { content: '\2756'; }
-[data-theme='political'][data-variant-sectionOrnament='\2727'] .post-body hr::before { content: '\2727\2009\2727'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\2726'] .post-body hr::before { content: '\2726'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\2766'] .post-body hr::before { content: '\2766'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\A7']   .post-body hr::before { content: '\A7\A0\A7\A0\A7'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\B6']   .post-body hr::before { content: '\B6'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\2767'] .post-body hr::before { content: '\2767'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\2756'] .post-body hr::before { content: '\2756'; }
+[data-theme='political'] .post-main[data-variant-sectionOrnament='\2727'] .post-body hr::before { content: '\2727\2009\2727'; }
 
 /* Column-rule style variants. */
-[data-theme='political'][data-variant-columnRule='solid']  .post-body { column-rule-style: solid; }
-[data-theme='political'][data-variant-columnRule='dotted'] .post-body { column-rule-style: dotted; }
-[data-theme='political'][data-variant-columnRule='double'] .post-body { column-rule-style: double; column-rule-width: 3px; }
+[data-theme='political'] .post-main[data-variant-columnRule='solid']  .post-body { column-rule-style: solid; }
+[data-theme='political'] .post-main[data-variant-columnRule='dotted'] .post-body { column-rule-style: dotted; }
+[data-theme='political'] .post-main[data-variant-columnRule='double'] .post-body { column-rule-style: double; column-rule-width: 3px; }
 
 /* Weathered stamp — the issue masthead drawn as a rotated label in a corner.
    content: attr() reads data-variant-issueMasthead off the same element. */
