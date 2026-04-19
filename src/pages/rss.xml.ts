@@ -16,6 +16,9 @@ export const GET: APIRoute = async (context) => {
       link: `/posts/${p.data.slug ?? p.id}/`,
       categories: [p.data.category, ...p.data.tags],
     })),
-    customData: '<language>en-us</language>',
+    customData:
+      '<language>en-us</language>' +
+      '<managingEditor>triambtalwar03@gmail.com (Triamb Talwar)</managingEditor>' +
+      '<webMaster>triambtalwar03@gmail.com (Triamb Talwar)</webMaster>',
   });
 };
