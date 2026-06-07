@@ -1,0 +1,49 @@
+---
+title: "what i actually do when i ship ai to enterprises"
+slug: "ai-floor-ceiling"
+category: tech
+visibility: public
+created: 2026-06-08
+tags: [ai, engineering, production, text-to-sql, graphrag, enterprise]
+links:
+  - slug: "fine-tuned-model-to-text-like-me"
+    reason: "the same pattern: catching what the model got wrong"
+    strength: 0.8
+  - slug: "mimir-home-assistant"
+    reason: "building something for yourself vs building it for a client"
+    strength: 0.4
+---
+
+i'm an AI engineer. my job, most days, is to take a business question a client already has, figure out what kind of AI system actually answers it, build that, and then figure out why it's wrong.
+
+that last part is the job. the build is fast. the "why is it wrong" takes weeks.
+
+## text-to-sql for people who don't know sql
+
+one of the first things i shipped at work was a natural-language-to-SQL layer for a client's internal dashboard. the idea is simple: someone asks a question in plain english, the model writes a query, the query runs, you get a table.
+
+the part nobody tells you: the model is confident about wrong queries. it won't say "i don't know this schema." it'll write something plausible, with correct syntax, that returns wrong results. a query that errors is easy — the error tells you what's broken. a query that silently returns the wrong rows is the hard one. the model doesn't know it's wrong. the user doesn't know either, unless they already knew the answer.
+
+the fix isn't a better model. the fix is knowing which questions have checkable answers and writing evals for those. business metrics the client already tracks. "total orders last week" — if the model's number doesn't match what they see in their existing report, you know you have a problem. build the eval before you demo.
+
+## graphrag for a knowledge base nobody maintained
+
+second client wanted answers over a corpus of internal documents — policy docs, SOPs, product specs. classic RAG setup. the first version worked in the demo. it failed in production because the documents contradicted each other — one SOP said one thing, the revision said another, the model picked one and didn't tell you it had picked.
+
+the move to GraphRAG (building a knowledge graph over the docs rather than flat vector chunks) fixed the contradiction surfacing — now you can query "where do sources disagree on X" and get a real answer instead of a hallucinated synthesis. but the graph construction is only as good as the entity extraction, and entity extraction on domain-specific internal jargon breaks quietly. you have to audit the graph. someone has to read it and say "that edge is wrong."
+
+that someone was me. not because i was the only one who could — because i was the one who looked.
+
+## what the job actually is
+
+the pattern across everything i've shipped:
+
+the AI builds the plausible thing fast. the human figures out what "plausible" is hiding. then the human builds the eval that catches it next time.
+
+this sounds like QA. it's not — it's closer to being the person who knows the domain well enough to know when the model is bullshitting. on text-to-sql, that means knowing what the business numbers should roughly look like. on graphrag, that means reading enough of the source documents to spot when the graph got an entity wrong. on the [fine-tune](./fine-tuned-model-to-text-like-me), that means knowing what you actually sound like.
+
+i'm also a PM on half these projects, which means i'm also the one deciding what to build before i build it. that combination — knowing what the client needs AND knowing what the model can actually do reliably — is where most AI projects go wrong. the demo works. the productization doesn't. you need someone in the room who can tell the difference before you've committed to six months of build.
+
+most of the failures i've seen aren't model failures. they're scope failures. someone decided to solve a problem with AI that AI isn't good at yet, or built for a demo that never had a path to production. the model was fine. the decision was wrong.
+
+the job is the decisions.

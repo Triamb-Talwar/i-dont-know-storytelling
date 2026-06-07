@@ -1,0 +1,70 @@
+---
+title: "i fine-tuned a 9b model on 73k of my own dms — and proved it wasn't just a prompt"
+slug: "fine-tuned-model-to-text-like-me"
+category: tech
+visibility: public
+created: 2026-06-08
+tags: [fine-tuning, llm, qlora, unsloth, hinglish, personal, register]
+links:
+  - slug: "mimir-home-assistant"
+    reason: "same instinct: run your own models, own your own data"
+    strength: 0.6
+  - slug: "ai-floor-ceiling"
+    reason: "the meta-point this project became"
+    strength: 0.7
+---
+
+here's the base model vs the fine-tune, same prompt, no system prompt, no examples:
+
+| prompt | base (untuned) | fine-tuned |
+|---|---|---|
+| "abe kaha tha kal raat" | "Arre wah! Kal raat ka scene yaad hai? 😂🤣 Chuttiye, tu toh..." | "sone de bkl" |
+| "kya kar rahi ho" (romantic) | "Hey! Just thinking about you and how much I miss your voice 😏✨" | "paise kamane 💀" |
+
+then i gave the BASE model 4 of my actual messages as in-context examples. state-of-the-art few-shot. still lost to the fine-tune that got zero examples — reply-only perplexity 30.6 vs 14.9.
+
+a smarter base is a better generic chatbot. the fine-tune is the opposite: it collapses all that capability into one specific terse shape. you can't get there with prompting. a prompt is a costume. training changes the body.
+
+## why cloning voice is harder than it looks
+
+the hard part isn't casual. casual is easy — just say "reply briefly, you're a GenZ indian dude." the hard part is **register switching**. i text differently to everyone. close friends: clipped, crude, assumes shared context. mum: full sentences, respectful. younger cousins: sassy but clean. romantic: warm, low-key, not thirsty. one model has to hold all of these, switch on context, and not bleed them together.
+
+you can't prompt-engineer that. you can tell a base model "be respectful now, this is your mum" and it'll approximate. but approximation isn't the thing. the thing is the trained default — before you've even named the context, the model already knows the register from how the conversation started.
+
+## 73k messages, a few decisions that mattered
+
+instagram DM export. 109 threads, 29k messages of mine. a few non-obvious calls:
+
+**6-hour gap segmentation.** split on 6h idle periods to get sessions, not infinite scrollback. the model needs to learn how to open conversations, not just react in the middle of one.
+
+**train on responses only.** loss-masked to only my messages. the model learns to generate me, not the person texting me.
+
+**multi-turn, not sliding windows.** early instinct was to chunk. wrong — multi-turn is how register is learned. the model sees the whole exchange and then predicts my reply. without that context it can't know who it's talking to.
+
+**reels as context.** a reply to a meme without the meme is meaningless. i kept reel replies with `[reel context: description]` prefixed. some of the tightest training data in the set — one meme, two words, perfect.
+
+## the T4 saga
+
+free kaggle GPU. Qwen3's hybrid attention requires bf16. T4 doesn't have bf16. NaN'd immediately on fp16. burned three attempts. confirmed a known unsloth bug. switched to Lightning AI's free L4 — 60 minutes, 298 steps, 2 epochs, LoRA r=32 (42.5M/4.58B params = 0.93%). then reran on 9B with an L40S in 35 minutes. 9B coherence is visibly better — holds 6-turn threads, stops hallucinating cricket scores.
+
+stack: Lightning (train) → HF Hub (weights) → Modal scale-to-zero (serve) → Netlify (frontend). ₹0 out of pocket.
+
+## the cuss problem
+
+data is friend-heavy, so the model defaulted to cussing across registers. elder_fam (mum, aunts) leak was 2% — not bad, but 2% of the time the model would drop a gaali in a message to a family member. unacceptable.
+
+DPO fixed it to 0%. but it over-generalized — taxed close_friend crudeness too, 8% → 3%. alignment tax. you trade one thing for another.
+
+**decision-D:** instead of one compromised model, serve two adapters on one base. SFT adapter for close friends (crude, authentic). DPO adapter for clean registers (family, professional). hot-swap per register at inference time. 0% leak in clean contexts AND intact crude voice in crude contexts. the architecture is the compromise, not the weights.
+
+## every place the model was wrong and i caught it
+
+the AI built the pipeline. the judgment was mine. the correction list:
+
+- `chod koi game khel` — cuss-detector flagged it. "chod" = "chhodna" = *leave* in hinglish romanization. caught a false positive that would've shipped.
+- `pakistan jeet gya` — model invented a cricket score. completely out of character. became the reason i added RAG-for-facts: persona fine-tunes don't know current events, they know your voice.
+- the fp16/bf16 dtype catch before committing to kaggle training.
+- `"is it the weights or just the prompt?"` — asked this twice, drove the base-vs-tuned comparison. without that skepticism there's no defensible claim.
+- first frontend UI looked like every claude-generated chat interface. redirected it.
+
+the AI ran the pipeline. the human made it good. that's [the actual job](./ai-floor-ceiling) — and it's more specific than it sounds.
