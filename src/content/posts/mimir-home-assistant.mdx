@@ -1,5 +1,5 @@
 ---
-title: "mimir: a personal ai that lives on my pc and talks to my phone"
+title: "mimir: a personal ai that lives on my pc and controls my phone"
 slug: "mimir-home-assistant"
 category: tech
 visibility: public
@@ -17,52 +17,35 @@ links:
     strength: 0.3
 ---
 
-i got tired of asking a cloud API to tell me things about my own life.
+the main reason i wanted to make Mimir is my habit of doomscrolling. now everyone doomscrolls, but i noticed that my feed across social media was just wars, fights, AI ending all life as we know it and whatnot. all of which might just come true, but i ain't gonna stop any of that — so i didn't want to worry about stuff i can't control. i barely control the controllables, bro, this was too much for me. 2nd reason was the childhood fantasy of having a Jarvis-like system, obviously.
 
-mimir is a personal AI companion. it runs in WSL on my PC, is accessible from my phone anywhere via tailscale, can control my phone and my PC, and costs me nothing per query. the name is from god of war — [the head in a bag that knows everything](./god-of-war-ragnarok) felt right for a "knows everything but attached to someone else" agent.
+## what it is
+
+a personal assistant that blocks my instagram, my twitter (not gonna call it X), and closes my steam executable so that i can't keep looking at a screen instead of focusing on the task at hand.
+
+is it effective? YES. my screentime has gone down, i've started reading again, no more cortisol spikes whenever anthropic tweets something. life's good.
 
 ## how it's wired
 
-```
-phone → tailscale → windows proxy → WSL companion → Hermes (local LLM)
-```
+it's a Hermes agent running on my PC via WSL2 that connects to my phone via a custom flutter app. why Flutter, you'd ask? easy to vibe-code and allows Hermes to control my phone end to end.
 
-longer version:
+funny thing is i was building my other app (Accountify — a Flutter app for tracking personal accountability) and was trying to get Claude to test the app end to end, and an idea struck — why not ask Claude to use wireless ADB debugging to simulate what a user would do? gave it a screenshot-to-chat tool and voilà, it found visual bugs on top of testing the whole flow end to end while i watched in awe.
 
-- my samsung S24 connects to `100.74.240.75:8645` — my PC's tailscale IP
-- a python proxy on windows receives that and forwards it to `172.18.122.56:8645` — the companion running in ubuntu WSL
-- the companion talks to Hermes, a local LLM server at `127.0.0.1:8642`
-- the companion has phone tools (taps, screen reads, app opens) via a shizuku layer in the flutter app
-- the companion has PC tools via a windows agent on the other side
+but how do you get an LLM to securely connect to your phone all the time and not expose all the data to some public port? the answer is a VPN like Tailscale — it connects my PC, WSL, and phone to one private network.
 
-why the proxy? WSL2 on my machine has mirrored networking broken — specific to the insider build i'm on. WSL can't bind directly to the tailscale interface, so i wrote a three-line proxy that can. it's ugly but it works and i'll fix it when microsoft fixes it.
+one catch: WSL2 mirrored networking is broken on my Windows build, so WSL can't bind directly to the Tailscale interface. fix is `mimir_wsl_proxy.py` — a python script running on Windows that just forwards traffic from the Tailscale IP  and LAN IP  into WSL  where the actual companion lives.
 
-## the asyncio bug that killed phone tools
+and how does Mimir interact with the phone? via an open-source tool called Shizuku. so when i ask Mimir to send a message to my friend, it finds WhatsApp, opens it, searches for the friend, takes a screenshot, clicks on them, types the message, and sends it.
 
-this one took a while.
+crazy right? nope — it uses 90 tool calls and $2 worth of DeepSeek tokens, which are dirt cheap, but still wasted so much.
 
-the companion uses websockets to talk to the phone. phone sends a message → companion streams a response → phone sends back tool results mid-stream (like "here's what's on screen after the tap you asked for").
+## the downsides
 
-the bug: the websocket endpoint was sequential. when a chat message came in, it `await stream_session_response(...)` — blocking the receive loop for the entire Hermes run, roughly 40 seconds. so when the phone sent back tool results, they queued up unprocessed until the timeout killed them.
+the battery drain is crazy. sometimes the watch timer doesn't count accurately or updates a few minutes late, so if i intended a 15-min break i can get like 20-22 mins — this is a known bug where `_currentApp` never clears via the usage-access fallback, so the watcher overcounts. honestly the token usage is wild for new tasks, and to optimise it i have to build a specific tool for the task or set of tasks — at which point i'm like, is this the best way to achieve what i set out to achieve?
 
-fix: `asyncio.create_task(_handle_chat(...))` instead of `await`. receive loop stays live. tool results land when they're supposed to.
+and the sad answer is no, not at all. the easiest and most efficient solution i found was giving my phone to my mom from 6:30 pm to 10 am. i'm WFH from 10 to 6, so yeah — out of sight out of mind beats harness engineering here.
+## why "Mimir"?
 
-this sounds obvious in retrospect. it always does.
+i just love God of War. the whole mainline saga is crazy, banger after banger, but i especially love the last 2 entries. what better name to give an all-knowing assistant than the smartest man alive?
 
-## samsung is adversarial
-
-One UI (samsung's android skin) has a separate battery management layer on top of standard android. "sleeping apps" and "deep sleeping apps" kill websocket connections the moment the app backgrounds. standard battery optimization exemption does nothing — samsung ignores it.
-
-current workaround: keep the flutter app in the foreground if you want tool calls to work. proper fix is FCM integration — how WhatsApp actually stays alive in the background. that's on the list.
-
-the deeper issue is samsung throttles the main dart isolate when backgrounded. `_handlePhoneToolRequest` needs to move to a foreground-service isolate. also on the list.
-
-## what it does today
-
-chat from my phone, get an answer from a local model, zero per-query cost. ask it to do something on my PC or phone, it does it through the tool layer. it knows my context because the context is in the system prompt and the companion persists sessions.
-
-the original premise was doomscroll coaching — mimir watching app usage and intervening. the watcher is half-built; there's a bug where `_currentApp` never clears via the usage-access fallback, so it overcounts screen time. fixing it this week.
-
-north star is ambient: mimir runs all the time, knows who i am, handles the things i used to delegate to stateless APIs that forget me between requests. the LLM is mine. the data stays on my machine. if a provider changes pricing or model behavior, nothing breaks.
-
-the tradeoff is it took a month to make the networking stable. cloud is easier. but easier means someone else controls the stack.
+seems fitting. i just ask Mimir to limit Insta usage to 2 hours and it keeps track and actually blocks the whole screen when 2hrs are up — none of that "add 15 mins" bs that Insta gives.
