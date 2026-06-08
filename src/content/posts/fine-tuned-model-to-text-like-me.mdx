@@ -7,8 +7,8 @@ created: 2026-06-08
 tags: [fine-tuning, llm, qlora, unsloth, hinglish, personal, register]
 links:
   - slug: "mimir-home-assistant"
-    reason: "same instinct: run your own models, own your own data"
-    strength: 0.6
+    reason: "next step — plug the model into mimir to text like me"
+    strength: 0.7
   - slug: "ai-floor-ceiling"
     reason: "the meta-point this project became"
     strength: 0.7
@@ -80,5 +80,7 @@ data is friend-heavy so the model cusses by default. to everyone. including fami
 DPO fixed the elder/family leak (2% → 0%) but made it too clean with close friends too --> alignment tax, you fix one thing you break another.
 
 so instead of one compromised model: two adapters on one base. SFT for close friends (crude, real). DPO for everyone else (clean). hot-swap at inference based on who you're talking to. 0% leak AND unfiltered close-friend mode simultaneously.
+
+next up: plugging this into [Mimir](./mimir-home-assistant). it already controls my phone and can open WhatsApp — so the obvious move is giving it my voice so it can actually text like me to my friends.
 
 try it: [triamb-bot.netlify.app](https://triamb-bot.netlify.app) Also pls thumbs up or down based on reactions so that i can add KTO/PPO layer on top thnks!
